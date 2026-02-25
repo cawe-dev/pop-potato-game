@@ -1,6 +1,7 @@
 import { wayfinder } from '@laravel/vite-plugin-wayfinder';
 import tailwindcss from '@tailwindcss/vite';
 import vue from '@vitejs/plugin-vue';
+import ui from '@nuxt/ui/vite'
 import laravel from 'laravel-vite-plugin';
 import { defineConfig } from 'vite';
 
@@ -22,6 +23,9 @@ export default defineConfig({
         }),
         wayfinder({
             formVariants: true,
+        }),
+        ui({
+            router: 'inertia'
         }),
     ],
 });
