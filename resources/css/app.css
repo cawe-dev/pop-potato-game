@@ -7,49 +7,60 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@font-face {
+  font-family: 'Pixelify Sans';
+  src: url('../fonts/PixelifySans-VariableFont_wght.ttf') format('truetype');
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme inline {
     --font-sans:
         Instrument Sans, ui-sans-serif, system-ui, sans-serif,
         'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
         'Noto Color Emoji';
-
+    --font-pixel: "Pixelify Sans", sans-serif;
+    
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);
     --radius-sm: calc(var(--radius) - 4px);
 
     --color-background: var(--background);
     --color-foreground: var(--foreground);
-
     --color-card: var(--card);
     --color-card-foreground: var(--card-foreground);
-
     --color-popover: var(--popover);
     --color-popover-foreground: var(--popover-foreground);
-
     --color-primary: var(--primary);
     --color-primary-foreground: var(--primary-foreground);
-
     --color-secondary: var(--secondary);
     --color-secondary-foreground: var(--secondary-foreground);
-
     --color-muted: var(--muted);
     --color-muted-foreground: var(--muted-foreground);
-
     --color-accent: var(--accent);
     --color-accent-foreground: var(--accent-foreground);
-
     --color-destructive: var(--destructive);
     --color-destructive-foreground: var(--destructive-foreground);
-
     --color-border: var(--border);
     --color-input: var(--input);
     --color-ring: var(--ring);
 
-    --color-chart-1: var(--chart-1);
-    --color-chart-2: var(--chart-2);
-    --color-chart-3: var(--chart-3);
-    --color-chart-4: var(--chart-4);
-    --color-chart-5: var(--chart-5);
+    --color-bg-elevated: var(--bg-elevated);
+    --color-bg-accented: var(--bg-accented);
+    --color-highlighted: var(--highlighted);
+    --color-success: var(--success);
+    --color-info: var(--info);
+    --color-warn: var(--warn);
+    --color-danger: var(--danger);
+    --color-text-muted: var(--text-muted);
+    --color-text-dimmed: var(--text-dimmed);
+
+    --color-chart-1: var(--primary);
+    --color-chart-2: var(--highlighted);
+    --color-chart-3: var(--secondary);
+    --color-chart-4: var(--accent);
+    --color-chart-5: var(--info);
 
     --color-sidebar: var(--sidebar-background);
     --color-sidebar-foreground: var(--sidebar-foreground);
@@ -61,105 +72,102 @@
     --color-sidebar-ring: var(--sidebar-ring);
 }
 
-/*
-  The default border color has changed to `currentColor` in Tailwind CSS v4,
-  so we've added these compatibility styles to make sure everything still
-  looks the same as it did with Tailwind CSS v3.
-
-  If we ever want to remove these styles, we need to add an explicit border
-  color utility to any element that depends on these defaults.
-*/
-@layer base {
-    *,
-    ::after,
-    ::before,
-    ::backdrop,
-    ::file-selector-button {
-        border-color: var(--color-gray-200, currentColor);
-    }
-}
-
-@layer utilities {
-    body,
-    html {
-        --font-sans:
-            'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
-            'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
-            'Noto Color Emoji';
-    }
-}
-
 :root {
-    --background: hsl(0 0% 100%);
-    --foreground: hsl(0 0% 3.9%);
-    --card: hsl(0 0% 100%);
-    --card-foreground: hsl(0 0% 3.9%);
-    --popover: hsl(0 0% 100%);
-    --popover-foreground: hsl(0 0% 3.9%);
-    --primary: hsl(0 0% 9%);
-    --primary-foreground: hsl(0 0% 98%);
-    --secondary: hsl(0 0% 92.1%);
-    --secondary-foreground: hsl(0 0% 9%);
-    --muted: hsl(0 0% 96.1%);
-    --muted-foreground: hsl(0 0% 45.1%);
-    --accent: hsl(0 0% 96.1%);
-    --accent-foreground: hsl(0 0% 9%);
-    --destructive: hsl(0 84.2% 60.2%);
-    --destructive-foreground: hsl(0 0% 98%);
-    --border: hsl(0 0% 92.8%);
-    --input: hsl(0 0% 89.8%);
-    --ring: hsl(0 0% 3.9%);
-    --chart-1: hsl(12 76% 61%);
-    --chart-2: hsl(173 58% 39%);
-    --chart-3: hsl(197 37% 24%);
-    --chart-4: hsl(43 74% 66%);
-    --chart-5: hsl(27 87% 67%);
+    --brand-primary: oklch(0.48 0.28 269.43);   
+    --brand-secondary: oklch(0.77 0.17 77.2);   
+    --brand-accent: oklch(0.63 0.23 26.03);     
+    --brand-highlight: oklch(0.74 0.19 161.4);  
+    --brand-success: oklch(0.70 0.21 148.1);    
+    --brand-info: oklch(0.68 0.18 245.0);       
+    --brand-warn: oklch(0.80 0.16 85.0);        
+    --brand-danger: oklch(0.46 0.23 26.03);     
+    
+    --neutral-white: oklch(1 0 0);              
+    --neutral-bg: oklch(0.98 0 0);             
+    --neutral-bg-soft: oklch(0.96 0 0);        
+    --neutral-text: oklch(0.16 0 0);           
+    --neutral-muted: oklch(0.53 0 0);          
+    --neutral-dimmed: oklch(0.69 0 0);         
+    --neutral-border: oklch(0.90 0 0);         
+    --neutral-border-high: oklch(0.86 0 0);    
+
+    --background: var(--neutral-bg);
+    --foreground: var(--neutral-text);
+    
+    --card: var(--neutral-white);
+    --card-foreground: var(--neutral-text);
+    
+    --popover: var(--neutral-white);
+    --popover-foreground: var(--neutral-text);
+    
+    --primary: var(--brand-primary);
+    --primary-foreground: var(--neutral-white);
+    
+    --secondary: var(--brand-secondary);
+    --secondary-foreground: var(--neutral-text);
+    
+    --muted: var(--neutral-bg-soft);
+    --muted-foreground: var(--neutral-muted);
+    
+    --accent: var(--brand-accent);
+    --accent-foreground: var(--neutral-white);
+    
+    --destructive: var(--brand-danger);
+    --destructive-foreground: var(--neutral-white);
+    
+    --border: var(--neutral-border);
+    --input: var(--neutral-border);
+    --ring: var(--brand-primary);
+    
+    --bg-elevated: var(--neutral-white);
+    --bg-accented: var(--neutral-bg-soft);
+    --highlighted: var(--brand-highlight);
+    --success: var(--brand-success);
+    --info: var(--brand-info);
+    --warn: var(--brand-warn);
+    --danger: var(--brand-danger);
+    --text-muted: var(--neutral-muted);
+    --text-dimmed: var(--neutral-dimmed);
+
     --radius: 0.5rem;
-    --sidebar-background: hsl(0 0% 98%);
-    --sidebar-foreground: hsl(240 5.3% 26.1%);
-    --sidebar-primary: hsl(0 0% 10%);
-    --sidebar-primary-foreground: hsl(0 0% 98%);
-    --sidebar-accent: hsl(0 0% 94%);
-    --sidebar-accent-foreground: hsl(0 0% 30%);
-    --sidebar-border: hsl(0 0% 91%);
-    --sidebar-ring: hsl(217.2 91.2% 59.8%);
-    --sidebar: hsl(0 0% 98%);
+
+    --sidebar-background: var(--neutral-bg);
+    --sidebar-foreground: var(--neutral-muted);
+    --sidebar-primary: var(--brand-primary);
+    --sidebar-primary-foreground: var(--neutral-white);
+    --sidebar-accent: var(--neutral-bg-soft);
+    --sidebar-accent-foreground: var(--neutral-text);
+    --sidebar-border: var(--neutral-border);
+    --sidebar-ring: var(--brand-primary);
 }
 
 .dark {
-    --background: hsl(0 0% 3.9%);
-    --foreground: hsl(0 0% 98%);
-    --card: hsl(0 0% 3.9%);
-    --card-foreground: hsl(0 0% 98%);
-    --popover: hsl(0 0% 3.9%);
-    --popover-foreground: hsl(0 0% 98%);
-    --primary: hsl(0 0% 98%);
-    --primary-foreground: hsl(0 0% 9%);
-    --secondary: hsl(0 0% 14.9%);
-    --secondary-foreground: hsl(0 0% 98%);
-    --muted: hsl(0 0% 16.08%);
-    --muted-foreground: hsl(0 0% 63.9%);
-    --accent: hsl(0 0% 14.9%);
-    --accent-foreground: hsl(0 0% 98%);
-    --destructive: hsl(0 84% 60%);
-    --destructive-foreground: hsl(0 0% 98%);
-    --border: hsl(0 0% 14.9%);
-    --input: hsl(0 0% 14.9%);
-    --ring: hsl(0 0% 83.1%);
-    --chart-1: hsl(220 70% 50%);
-    --chart-2: hsl(160 60% 45%);
-    --chart-3: hsl(30 80% 55%);
-    --chart-4: hsl(280 65% 60%);
-    --chart-5: hsl(340 75% 55%);
-    --sidebar-background: hsl(0 0% 7%);
-    --sidebar-foreground: hsl(0 0% 95.9%);
-    --sidebar-primary: hsl(360, 100%, 100%);
-    --sidebar-primary-foreground: hsl(0 0% 100%);
-    --sidebar-accent: hsl(0 0% 15.9%);
-    --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
-    --sidebar-border: hsl(0 0% 15.9%);
-    --sidebar-ring: hsl(217.2 91.2% 59.8%);
-    --sidebar: hsl(240 5.9% 10%);
+    --background: oklch(0.13 0 0);            
+    --foreground: var(--neutral-white);
+    
+    --card: oklch(0.16 0 0);                
+    --card-foreground: var(--neutral-white);
+    
+    --popover: oklch(0.16 0 0);
+    --popover-foreground: var(--neutral-white);
+    
+    --primary: var(--brand-primary);
+    --primary-foreground: var(--neutral-white);
+    
+    --secondary: var(--brand-secondary);
+    --secondary-foreground: var(--neutral-text);
+    
+    --muted: oklch(0.20 0 0);
+    --muted-foreground: var(--neutral-dimmed);
+    
+    --accent: var(--brand-accent);
+    --accent-foreground: var(--neutral-white);
+    
+    --border: oklch(0.25 0 0);
+    --input: oklch(0.25 0 0);
+    
+    --sidebar-background: oklch(0.10 0 0);
+    --sidebar-foreground: var(--neutral-dimmed);
 }
 
 @layer base {
