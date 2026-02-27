@@ -2,10 +2,11 @@
 import { Head } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { onMounted, onUnmounted, ref, watch } from 'vue';
-import Avatars from '@/components/lp/avatars.vue';
+import Avatars from '@/components/lp/Avatars.vue';
 import { useTyping } from '@/composables/useTyping';
 import { THEMES } from '@/constants/themes';
 import { QUESTIONS } from '@/constants/questions';
+import PixelEmojis from '@/components/lp/PixelEmojis.vue';
 
 const currentThemeIndex = ref(0);
 const { typedText: question, typeText } = useTyping();
@@ -35,6 +36,7 @@ onUnmounted(() => {
     </Head>
 
     <AppLayout>
+        <PixelEmojis />
         <UPage>
             <template #left>
                 <UPageAside>
@@ -64,6 +66,14 @@ onUnmounted(() => {
                     <span class="border-r-4 border-foreground pr-1 animate-cursor">
                         {{ question }}
                     </span>
+                </template>
+
+                <template #links>
+                    <UContainer>
+                        <UButton
+                            class="surface-elevated surface-elevated-interactive bg-accent hover:bg-accent/85 active:bg-accent/85 text-5xl py-10"
+                            block label="JOGAR" />
+                    </UContainer>
                 </template>
             </UPageHero>
 
