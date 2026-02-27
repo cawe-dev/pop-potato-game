@@ -42,7 +42,7 @@ onUnmounted(() => {
                 </UPageAside>
             </template>
 
-            <UPageHero :key="currentThemeIndex" :ui="{
+            <UPageHero :ui="{
                 headline: 'text-foreground border-4 surface-elevated surface-elevated-interactive px-4 py-2 md:px-8 md:py-3 text-center',
                 title: 'font-light flex justify-center gap-5 mt-12',
                 description: 'text-foreground font-mono leading-relaxed text-balance text-3xl sm:text-4xl font-bold'
