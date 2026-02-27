@@ -1,6 +1,7 @@
 @theme {
   --animate-cursor: cursor 0.8s step-end infinite;
-
+  --animate-bounce-soft: bounce-soft ease-in-out infinite;
+  
     @keyframes typing {
         from { width: 0 }
         to { width: 100% }
@@ -8,5 +9,14 @@
   
     @keyframes cursor {
         50% {border-color: transparent}
+    }
+
+    @keyframes bounce-soft {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-8px);
+        }
     }
 }
