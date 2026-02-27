@@ -1,0 +1,12 @@
+@theme {
+  --animate-cursor: cursor 0.8s step-end infinite;
+
+    @keyframes typing {
+        from { width: 0 }
+        to { width: 100% }
+    }
+  
+    @keyframes cursor {
+        50% {border-color: transparent}
+    }
+}

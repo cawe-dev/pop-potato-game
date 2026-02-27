@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @import "@nuxt/ui";
+@import './animations.css';
 @import 'tw-animate-css';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
@@ -168,6 +169,28 @@
     
     --sidebar-background: oklch(0.10 0 0);
     --sidebar-foreground: var(--neutral-dimmed);
+}
+
+.surface-elevated {
+  border: 3px solid #1A1A1A;
+  box-shadow: 4px 4px 0px #1A1A1A;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.surface-elevated-sm {
+  border: 2px solid #1A1A1A;
+  box-shadow: 3px 3px 0px #1A1A1A;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.surface-elevated-interactive:hover {
+  box-shadow: 6px 6px 0px #1A1A1A;
+  transform: translate(-2px, -2px);
+}
+
+.surface-elevated-interactive:active {
+  box-shadow: 1px 1px 0px #1A1A1A;
+  transform: translate(2px, 2px);
 }
 
 @layer base {
