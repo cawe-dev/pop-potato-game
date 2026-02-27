@@ -41,7 +41,7 @@ onUnmounted(() => {
         animationDuration: `${2 + avatar * 0.2}s`,
         animationDelay: `${avatar * 0.1}s`
     }">
-        <UTooltip arrow defaultOpen :text="activeTexts[avatar - 1]" :content="{
+        <UTooltip arrow defaultOpen open :text="activeTexts[avatar - 1]" :content="{
             side: 'top'
         }" :ui="{
             content: 'surface-elevated surface-elevated-interactive font-mono'
