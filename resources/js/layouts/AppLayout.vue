@@ -1,20 +1,11 @@
 <script setup lang="ts">
-import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
-import type { BreadcrumbItem } from '@/types';
-
-type Props = {
-    breadcrumbs?: BreadcrumbItem[];
-};
-
-withDefaults(defineProps<Props>(), {
-    breadcrumbs: () => [],
-});
 </script>
 
 <template>
     <UApp>
-        <AppLayout :breadcrumbs="breadcrumbs">
+        <UMain>
             <slot />
-        </AppLayout>
+        </UMain>
+        <UFooter />
     </UApp>
 </template>
