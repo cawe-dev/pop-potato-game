@@ -6,7 +6,7 @@ import Avatars from '@/components/lp/Avatars.vue';
 import { useTyping } from '@/composables/useTyping';
 import { THEMES } from '@/constants/themes';
 import { QUESTIONS } from '@/constants/questions';
-import PixelEmojis from '@/components/lp/PixelEmojis.vue';
+import FloatAvatars from '@/components/lp/FloatAvatars.vue';
 
 const currentThemeIndex = ref(0);
 const { typedText: question, typeText } = useTyping();
@@ -36,7 +36,7 @@ onUnmounted(() => {
     </Head>
 
     <AppLayout>
-        <PixelEmojis />
+        <FloatAvatars />
         <UPage>
             <template #left>
                 <UPageAside>
