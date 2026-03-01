@@ -1,0 +1,55 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Repository\Eloquent;
+
+use App\Repository\IBaseRepository;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Pagination\LengthAwarePaginator;
+
+abstract class BaseRepository implements IBaseRepository
+{
+    public function __construct(private Model $model) {}
+
+    final public function find(int $id)
+    {
+        return $this->model->find($id);
+    }
+
+    final public function findAll()
+    {
+        return $this->model->all();
+    }
+
+    final public function create(array $data)
+    {
+        return $this->model->create($data);
+    }
+
+    final public function update(int $id, array $data)
+    {
+        $record = $this->find($id);
+        $record->update($data);
+
+        return $record;
+    }
+
+    final public function delete(int $id)
+    {
+        $record = $this->find($id);
+
+        return $record->delete();
+    }
+
+    final public function findAllPaginated(int $perPage): LengthAwarePaginator
+    {
+        return $this->paginateQuery($this->model->query(), $perPage);
+    }
+
+    private function paginateQuery(Builder $query, int $perPage = 15): LengthAwarePaginator
+    {
+        return $query->paginate($perPage)->withQueryString();
+    }
+}

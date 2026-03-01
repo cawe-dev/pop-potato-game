@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
@@ -20,8 +22,8 @@ test('password can be updated', function () {
         ->actingAs($user)
         ->from(route('user-password.edit'))
         ->put(route('user-password.update'), [
-            'current_password' => 'password',
-            'password' => 'new-password',
+            'current_password'      => 'password',
+            'password'              => 'new-password',
             'password_confirmation' => 'new-password',
         ]);
 
@@ -39,8 +41,8 @@ test('correct password must be provided to update password', function () {
         ->actingAs($user)
         ->from(route('user-password.edit'))
         ->put(route('user-password.update'), [
-            'current_password' => 'wrong-password',
-            'password' => 'new-password',
+            'current_password'      => 'wrong-password',
+            'password'              => 'new-password',
             'password_confirmation' => 'new-password',
         ]);
 
