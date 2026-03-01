@@ -20,8 +20,12 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'nickname',
         'email',
         'password',
+        'icon_type',
+        'icon_seed',
+        'is_guest',
     ];
 
     /**
@@ -47,6 +51,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
+            'is_guest' => 'boolean',
         ];
     }
 }
