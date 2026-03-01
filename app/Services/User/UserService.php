@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\User;
 
 use App\Repository\Eloquent\User\IUserRepository;
 use App\Services\BaseService;
 use Illuminate\Database\Eloquent\Model;
 
-class UserService extends BaseService implements IUserService
+final class UserService extends BaseService implements IUserService
 {
     public function __construct(IUserRepository $repository)
     {
@@ -16,7 +18,7 @@ class UserService extends BaseService implements IUserService
     public function createGuest(string $nickname): Model
     {
         return $this->store([
-            'name' => $nickname,
+            'name'     => $nickname,
             'nickname' => $nickname,
             'is_guest' => true,
         ]);

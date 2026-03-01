@@ -1,14 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Auth\GuestLoginRequest;
 use App\Services\User\IUserService;
 use Illuminate\Support\Facades\Auth;
 
-class GuestSessionController extends Controller
+final class GuestSessionController extends Controller
 {
-
     public function __construct(protected IUserService $userService) {}
 
     public function __invoke(GuestLoginRequest $request)

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repository\Eloquent;
 
 use App\Repository\IBaseRepository;
@@ -7,9 +9,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-class BaseRepository implements IBaseRepository
+final class BaseRepository implements IBaseRepository
 {
-    public function __construct(protected Model $model) {}
+    public function __construct(private Model $model) {}
 
     public function find(int $id)
     {
@@ -37,6 +39,7 @@ class BaseRepository implements IBaseRepository
     public function delete(int $id)
     {
         $record = $this->find($id);
+
         return $record->delete();
     }
 
@@ -45,7 +48,7 @@ class BaseRepository implements IBaseRepository
         return $this->paginateQuery($this->model->query(), $perPage);
     }
 
-    protected function paginateQuery(Builder $query, int $perPage = 15): LengthAwarePaginator
+    private function paginateQuery(Builder $query, int $perPage = 15): LengthAwarePaginator
     {
         return $query->paginate($perPage)->withQueryString();
     }
