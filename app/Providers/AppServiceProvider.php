@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Repository\Eloquent\User\IUserRepository;
+use App\Repository\Eloquent\User\UserRepository;
+use App\Services\User\IUserService;
+use App\Services\User\UserService;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -15,7 +19,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(IUserService::class, UserService::class);
+        $this->app->bind(IUserRepository::class, UserRepository::class);
     }
 
     /**
