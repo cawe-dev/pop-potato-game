@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Repository\Eloquent\Room\IRoomRepository;
+use App\Repository\Eloquent\Room\RoomRepository;
 use App\Repository\Eloquent\User\IUserRepository;
 use App\Repository\Eloquent\User\UserRepository;
+use App\Services\Room\IRoomService;
+use App\Services\Room\RoomService;
 use App\Services\User\IUserService;
 use App\Services\User\UserService;
 use Carbon\CarbonImmutable;
@@ -23,6 +27,10 @@ final class AppServiceProvider extends ServiceProvider
     {
         $this->app->bind(IUserService::class, UserService::class);
         $this->app->bind(IUserRepository::class, UserRepository::class);
+
+        $this->app->bind(IRoomService::class, RoomService::class);
+        $this->app->bind(IRoomRepository::class, RoomRepository::class);
+
     }
 
     /**
