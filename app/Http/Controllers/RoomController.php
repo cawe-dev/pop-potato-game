@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Room\StoreRoomRequest;
 use App\Models\Room;
 use App\Services\Room\IRoomService;
 use Illuminate\Http\Request;
@@ -22,9 +23,14 @@ final class RoomController extends Controller
         //
     }
 
-    public function store(Request $request)
+    public function store(StoreRoomRequest $request)
     {
-        //
+        $validated = $request->validated();
+        $data = array_merge($validated, ['user_id' => auth()->id()]);
+
+        $this->roomService->store($data);
+
+        return redirect()->intended(route('room.index'));
     }
 
     public function show(Room $room)
