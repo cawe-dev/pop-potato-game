@@ -22,7 +22,7 @@ final class StoreRoomRequest extends FormRequest
         return [
             'max_users' => 'required|numeric|min:2',
             'code'      => 'required|unique:rooms,code',
-            'password'  => 'min:4|string|nullable',
+            'password'  => 'required_if:type,private|min:4|string|nullable',
             'theme'     => [Rule::enum(RoomTheme::class), 'required'],
             'icon'      => 'required|string',
             'type'      => [Rule::enum(RoomType::class), 'required'],

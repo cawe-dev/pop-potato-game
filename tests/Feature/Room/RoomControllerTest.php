@@ -9,33 +9,46 @@ beforeEach(function () {
     $this->actingAs($user);
 });
 
-it('should be able to create a room', function () {
-    $response = $this->post(route('room.store'), [
-        'code'      => 'TESTE',
-        'icon'      => 'lucide:fish',
-        'password'  => null,
-        'theme'     => 'underwater',
-        'type'      => 'public',
-        'max_users' => '2',
-        'game_mode' => 'default',
-    ]);
+describe('Create Room', function () {
 
-    $response->assertRedirect(route('room.index'));
+    it('should be able to create a public room', function () {
+        $payload = [
+            'code'      => 'TESTE',
+            'icon'      => 'lucide:fish',
+            'password'  => null,
+            'theme'     => 'underwater',
+            'type'      => 'public',
+            'max_users' => '2',
+            'game_mode' => 'default',
+        ];
 
-    $this->assertDatabaseHas('rooms', [
-        'code'      => 'TESTE',
-        'icon'      => 'lucide:fish',
-        'password'  => null,
-        'theme'     => 'underwater',
-        'type'      => 'public',
-        'max_users' => '2',
-        'game_mode' => 'default',
-        'status'    => 'waiting',
-        'user_id'   => auth()->id(),
-    ]);
+        $response = $this->post(route('room.store'), $payload);
+
+        $response->assertRedirect(route('room.index'));
+
+        $this->assertDatabaseHas('rooms', $payload);
+    });
+
+    it('should be able to create a private room', function () {
+        $payload = [
+            'code'      => 'TESTE',
+            'icon'      => 'lucide:fish',
+            'password'  => '1234',
+            'theme'     => 'underwater',
+            'type'      => 'private',
+            'max_users' => '2',
+            'game_mode' => 'default',
+        ];
+
+        $response = $this->post(route('room.store'), $payload);
+
+        $response->assertRedirect(route('room.index'));
+
+        $this->assertDatabaseHas('rooms', $payload);
+    });
 });
 
-describe('Room Validations', function () {
+describe('Create Room Validations', function () {
     it('should not be able to create a room without required fields', function (string $field) {
         $payload = [
             'code'      => 'TESTE',
@@ -91,5 +104,20 @@ describe('Room Validations', function () {
 
         $response->assertStatus(302)
             ->assertInvalid('max_users');
+    });
+
+    it('should not be able to create a room without password', function () {
+        $response = $this->post(route('room.store'), [
+            'code'      => 'TESTE',
+            'icon'      => 'lucide:fish',
+            'password'  => null,
+            'theme'     => 'underwater',
+            'type'      => 'private',
+            'game_mode' => 'default',
+            'max_users' => '2',
+        ]);
+
+        $response->assertStatus(302)
+            ->assertInvalid('password');
     });
 });
