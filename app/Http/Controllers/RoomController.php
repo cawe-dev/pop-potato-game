@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Room\StoreRoomRequest;
+use App\Http\Requests\Room\UpdateRoomRequest;
 use App\Models\Room;
 use App\Services\Room\IRoomService;
-use Illuminate\Http\Request;
 
 final class RoomController extends Controller
 {
@@ -43,9 +43,11 @@ final class RoomController extends Controller
         //
     }
 
-    public function update(Request $request, Room $room)
+    public function update(UpdateRoomRequest $request, Room $room)
     {
-        //
+        $this->roomService->update($room->id, $request->all());
+
+        return redirect()->intended(route('room.index'));
     }
 
     public function destroy(Room $room)
