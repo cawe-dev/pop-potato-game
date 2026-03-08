@@ -48,6 +48,31 @@ describe('Create Room', function () {
         $this->assertDatabaseHas('rooms', array_merge($payload, ['user_id' => auth()->id()]));
     });
 
+    it('should be able to create a room as a guest user', function () {
+        $guestUser = User::factory()->create([
+            'nickname' => 'GuestUser',
+            'email'    => null,
+            'is_guest' => true,
+        ]);
+        $this->actingAs($guestUser);
+
+        $payload = [
+            'code'      => 'TESTE',
+            'icon'      => 'lucide:fish',
+            'password'  => '1234',
+            'theme'     => 'underwater',
+            'type'      => 'private',
+            'max_users' => '2',
+            'game_mode' => 'default',
+        ];
+
+        $response = $this->post(route('room.store'), $payload);
+
+        $response->assertRedirect(route('room.index'));
+
+        $this->assertDatabaseHas('rooms', array_merge($payload, ['user_id' => $guestUser->id]));
+    });
+
     describe('Validations', function () {
         it('should not be able to create a room without required fields', function (string $field) {
             $payload = [
