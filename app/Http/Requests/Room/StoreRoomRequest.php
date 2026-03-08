@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Room;
 
-use App\RoomGameMode;
-use App\RoomTheme;
-use App\RoomType;
+use App\Enums\Room\RoomGameMode;
+use App\Enums\Room\RoomTheme;
+use App\Enums\Room\RoomType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\RoomGameMode;
-use App\RoomStatus;
-use App\RoomTheme;
-use App\RoomType;
+use App\Enums\Room\RoomGameMode;
+use App\Enums\Room\RoomStatus;
+use App\Enums\Room\RoomTheme;
+use App\Enums\Room\RoomType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
