@@ -2,8 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Enums\Room\RoomGameMode;
+use App\Enums\Room\RoomTheme;
 use App\Models\Room;
 use App\Models\User;
+use Illuminate\Testing\Fluent\AssertableJson;
 
 beforeEach(function () {
     $user = User::factory()->create();
@@ -183,6 +186,82 @@ describe('Create Room', function () {
             $response->assertStatus(302)
                 ->assertInvalid('password');
         });
+    });
+});
+
+describe('Read Room', function () {
+    $publicRoom = null;
+    $privateRoom = null;
+
+    beforeEach(function () use (&$publicRoom, &$privateRoom) {
+        $publicRoom = Room::factory(10)->create(['user_id' => auth()->id(), 'type' => 'public']);
+        $privateRoom = Room::factory(10)->create(['user_id' => auth()->id(), 'type' => 'private']);
+    });
+
+    it('should be able to list all rooms with pagination', function () use (&$publicRoom) {
+        $response = $this->get(route('room.index'));
+
+        $response->assertOk();
+        $response->assertJson(
+            fn (AssertableJson $json) => $json
+                ->has('data', 15)
+                ->has('links')
+                ->where('current_page', 1)
+                ->where('per_page', 15)
+                ->has(
+                    'data.0',
+                    fn ($json) => $json->hasAll(collect($publicRoom[0]->getAttributes())->keys()->toArray())
+                        ->where('id', $publicRoom[0]->id)
+                        ->where('code', $publicRoom[0]->code)
+                        ->where('type', 'public')
+                        ->etc()
+                )->etc()
+        );
+    });
+    describe('Filter Validation', function () {
+        it('filters rooms by simple fields', function ($field, $value) {
+            Room::factory()->create([$field => $value]);
+
+            $this->get(route('room.index', [$field => $value]))
+                ->assertOk()
+                ->assertJsonPath("data.0.$field", $value);
+        })->with([
+            ['code', 'ABC2'],
+            ['type', 'public'],
+        ]);
+
+        it('should filter rooms by theme', function () {
+            Room::factory()->create(['theme' => RoomTheme::UNDERWATER, 'type' => 'public']);
+            Room::factory()->create(['theme' => RoomTheme::FILMS, 'type' => 'public']);
+
+            $response = $this->get(route('room.index', ['theme' => [RoomTheme::UNDERWATER->value]]));
+
+            $response->assertOk()
+                ->assertJsonCount(1, 'data')
+                ->assertJsonPath('data.0.theme', RoomTheme::UNDERWATER->value);
+        });
+
+        it('should filter rooms by game mode', function () {
+            Room::factory()->create(['game_mode' => RoomGameMode::HARD_POTATO]);
+
+            $response = $this->get(route('room.index', ['game_mode' => [RoomGameMode::HARD_POTATO->value]]));
+
+            $response->assertOk()
+                ->assertJsonPath('data.0.game_mode', RoomGameMode::HARD_POTATO->value);
+        });
+
+        it('should not be able to list rooms if the filters are invalid', function (string $field, $value) {
+            $response = $this->get(route('room.index', [$field => $value]));
+
+            $response->assertStatus(302);
+            $response->isInvalid($field);
+        })->with([
+            'invalid code (too short)' => ['code', 'abc'],
+            'invalid code (too long)'  => ['code', 'abcde'],
+            'invalid type'             => ['type', 'not-a-valid-type'],
+            'invalid game_mode'        => ['game_mode', 'game-mode-non-existent'],
+            'invalid theme'            => ['theme', 'theme-non-existent'],
+        ]);
     });
 });
 
