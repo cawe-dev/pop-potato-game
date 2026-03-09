@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Filters\RoomFilter;
+use App\Http\Requests\Room\IndexRoomRequest;
 use App\Http\Requests\Room\StoreRoomRequest;
 use App\Http\Requests\Room\UpdateRoomRequest;
 use App\Models\Room;
@@ -13,9 +15,9 @@ final class RoomController extends Controller
 {
     public function __construct(protected IRoomService $roomService) {}
 
-    public function index()
+    public function index(IndexRoomRequest $request, RoomFilter $filter)
     {
-        //
+        return $this->roomService->indexPaginated($filter);
     }
 
     public function create()

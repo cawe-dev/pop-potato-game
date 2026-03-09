@@ -8,6 +8,8 @@ use App\Enums\Room\RoomGameMode;
 use App\Enums\Room\RoomStatus;
 use App\Enums\Room\RoomTheme;
 use App\Enums\Room\RoomType;
+use App\Filters\QueryFilter;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -31,6 +33,11 @@ final class Room extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function scopeFilter(Builder $query, QueryFilter $filters): Builder
+    {
+        return $filters->apply($query);
     }
 
     protected function casts(): array

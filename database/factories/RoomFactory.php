@@ -20,7 +20,7 @@ final class RoomFactory extends Factory
     public function definition(): array
     {
         return [
-            'code'      => $this->faker->unique()->bothify('????-####'),
+            'code'      => $this->faker->unique()->bothify('??#?'),
             'icon'      => $this->faker->randomElement(['lucide:book-open', 'lucide:film', 'lucide:rocket', 'lucide:fish', 'lucide:code']),
             'password'  => $this->faker->optional()->password(),
             'theme'     => $this->faker->randomElement(['space', 'films', 'programming']),
