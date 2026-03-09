@@ -15,9 +15,9 @@ final class RoomService extends BaseService implements IRoomService
         parent::__construct($repository);
     }
 
-    public function generateRoomCode(): string
+    private function generateRoomCode(): string
     {
         return Str::random(4)
-            |> Str::upper(...);
+        |> Str::upper(...);
     }
 }
