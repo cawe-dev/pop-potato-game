@@ -37,7 +37,7 @@ final class RoomController extends Controller
 
     public function show(Room $room)
     {
-        //
+        return $this->roomService->show($room->id);
     }
 
     public function edit(Room $room)

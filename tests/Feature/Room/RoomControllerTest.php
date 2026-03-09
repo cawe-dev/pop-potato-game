@@ -218,6 +218,15 @@ describe('Read Room', function () {
                 )->etc()
         );
     });
+
+    it('should be possible to list specific rooms by id', function () use (&$publicRoom) {
+        $response = $this->get(route('room.show', $publicRoom[0]->id));
+        $response->assertOk()
+            ->assertJsonFragment([
+                'id' => $publicRoom[0]->id,
+            ]);
+    });
+
     describe('Filter Validation', function () {
         it('filters rooms by simple fields', function ($field, $value) {
             Room::factory()->create([$field => $value]);
