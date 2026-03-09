@@ -28,7 +28,9 @@ final class RoomController extends Controller
     public function store(StoreRoomRequest $request)
     {
         $validated = $request->validated();
-        $data = array_merge($validated, ['user_id' => auth()->id()]);
+        $data = array_merge($validated, [
+            'user_id' => auth()->id(),
+        ]);
 
         $this->roomService->store($data);
 

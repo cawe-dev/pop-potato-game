@@ -17,7 +17,6 @@ describe('Create Room', function () {
 
     it('should be able to create a public room', function () {
         $payload = [
-            'code'      => 'TESTE',
             'icon'      => 'lucide:fish',
             'password'  => null,
             'theme'     => 'underwater',
@@ -35,7 +34,6 @@ describe('Create Room', function () {
 
     it('should be able to create a private room', function () {
         $payload = [
-            'code'      => 'TESTE',
             'icon'      => 'lucide:fish',
             'password'  => '1234',
             'theme'     => 'underwater',
@@ -60,7 +58,6 @@ describe('Create Room', function () {
         $this->actingAs($guestUser);
 
         $payload = [
-            'code'      => 'TESTE',
             'icon'      => 'lucide:fish',
             'password'  => '1234',
             'theme'     => 'underwater',
@@ -79,7 +76,6 @@ describe('Create Room', function () {
     describe('Validations', function () {
         it('should not be able to create a room without required fields', function (string $field) {
             $payload = [
-                'code'      => 'TESTE',
                 'icon'      => 'lucide:fish',
                 'password'  => null,
                 'theme'     => 'underwater',
@@ -94,7 +90,6 @@ describe('Create Room', function () {
             $response->assertStatus(302)
                 ->assertInvalid($field);
         })->with([
-            'code',
             'theme',
             'game_mode',
             'type',
@@ -102,7 +97,6 @@ describe('Create Room', function () {
 
         it('should not be able to create a room with user define status', function () {
             $payload = [
-                'code'      => 'TESTE',
                 'icon'      => 'lucide:fish',
                 'password'  => null,
                 'theme'     => 'underwater',
@@ -123,7 +117,6 @@ describe('Create Room', function () {
 
         it('should not be able to create a room with only one max_users', function () {
             $payload = [
-                'code'      => 'TESTE',
                 'icon'      => 'lucide:fish',
                 'password'  => null,
                 'theme'     => 'underwater',
@@ -140,7 +133,6 @@ describe('Create Room', function () {
 
         it('should not be able to create a room without password', function () {
             $payload = [
-                'code'      => 'TESTE',
                 'icon'      => 'lucide:fish',
                 'password'  => null,
                 'theme'     => 'underwater',

@@ -31,6 +31,8 @@ abstract class BaseService
 
     final public function store(array $data): Model
     {
+        $data = $this->beforeStore($data);
+
         return $this->repository->create($data);
     }
 
@@ -42,5 +44,10 @@ abstract class BaseService
     final public function destroy(int $id): bool
     {
         return $this->repository->delete($id);
+    }
+
+    protected function beforeStore(array $data): array
+    {
+        return $data;
     }
 }
