@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Repository\Eloquent;
 
+use App\Filters\QueryFilter;
 use App\Repository\IBaseRepository;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -43,13 +43,12 @@ abstract class BaseRepository implements IBaseRepository
         return $record->delete();
     }
 
-    final public function findAllPaginated(int $perPage): LengthAwarePaginator
+    final public function findAllPaginated(int $perPage = 15, ?QueryFilter $filters = null): LengthAwarePaginator
     {
-        return $this->paginateQuery($this->model->query(), $perPage);
-    }
-
-    private function paginateQuery(Builder $query, int $perPage = 15): LengthAwarePaginator
-    {
-        return $query->paginate($perPage)->withQueryString();
+        return $this->model->query()
+            ->latest()
+            ->when($filters, fn ($query) => $query->filter($filters))
+            ->paginate($perPage)
+            ->withQueryString();
     }
 }
