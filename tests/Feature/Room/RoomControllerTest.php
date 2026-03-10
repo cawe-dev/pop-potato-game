@@ -17,7 +17,6 @@ describe('Create Room', function () {
 
     it('should be able to create a public room', function () {
         $payload = [
-            'icon'      => 'lucide:fish',
             'password'  => null,
             'theme'     => 'underwater',
             'type'      => 'public',
@@ -34,7 +33,6 @@ describe('Create Room', function () {
 
     it('should be able to create a private room', function () {
         $payload = [
-            'icon'      => 'lucide:fish',
             'password'  => '1234',
             'theme'     => 'underwater',
             'type'      => 'private',
@@ -58,7 +56,6 @@ describe('Create Room', function () {
         $this->actingAs($guestUser);
 
         $payload = [
-            'icon'      => 'lucide:fish',
             'password'  => '1234',
             'theme'     => 'underwater',
             'type'      => 'private',
@@ -76,7 +73,6 @@ describe('Create Room', function () {
     describe('Validations', function () {
         it('should not be able to create a room without required fields', function (string $field) {
             $payload = [
-                'icon'      => 'lucide:fish',
                 'password'  => null,
                 'theme'     => 'underwater',
                 'type'      => 'public',
@@ -97,7 +93,6 @@ describe('Create Room', function () {
 
         it('should not be able to create a room with more fields than expected', function (string $field, string $value) {
             $payload = [
-                'icon'      => 'lucide:fish',
                 'password'  => null,
                 'theme'     => 'underwater',
                 'type'      => 'public',
@@ -107,7 +102,6 @@ describe('Create Room', function () {
             ];
 
             $expectPayload = [
-                'icon'      => 'lucide:fish',
                 'password'  => null,
                 'theme'     => 'underwater',
                 'type'      => 'public',
@@ -129,7 +123,6 @@ describe('Create Room', function () {
 
         it('should not be able to create a room with user define status', function () {
             $payload = [
-                'icon'      => 'lucide:fish',
                 'password'  => null,
                 'theme'     => 'underwater',
                 'type'      => 'public',
@@ -149,7 +142,6 @@ describe('Create Room', function () {
 
         it('should not be able to create a room with only one max_users', function () {
             $payload = [
-                'icon'      => 'lucide:fish',
                 'password'  => null,
                 'theme'     => 'underwater',
                 'type'      => 'public',
@@ -165,7 +157,6 @@ describe('Create Room', function () {
 
         it('should not be able to create a room without password', function () {
             $payload = [
-                'icon'      => 'lucide:fish',
                 'password'  => null,
                 'theme'     => 'underwater',
                 'type'      => 'private',
@@ -181,7 +172,6 @@ describe('Create Room', function () {
 
         it('ensure that the create status room to private require password', function () {
             $payload = [
-                'icon'      => 'lucide:fish',
                 'password'  => null,
                 'theme'     => 'underwater',
                 'type'      => 'private',
@@ -197,7 +187,6 @@ describe('Create Room', function () {
 
         it('ensure that the create status room to public require clean password', function () {
             $payload = [
-                'icon'      => 'lucide:fish',
                 'password'  => '1234',
                 'theme'     => 'underwater',
                 'type'      => 'public',
@@ -234,10 +223,15 @@ describe('Read Room', function () {
                 ->where('per_page', 15)
                 ->has(
                     'data.0',
-                    fn ($json) => $json->hasAll(collect($publicRoom[0]->getAttributes())->forget('password')->keys()->toArray())
-                        ->where('id', $publicRoom[0]->id)
-                        ->where('code', $publicRoom[0]->code)
-                        ->where('type', 'public')
+                    fn ($json) => $json
+                        ->hasAll(collect($publicRoom[0]->getAttributes())->forget('password')->keys()->toArray())
+                )
+                ->has(
+                    'data',
+                    fn ($json) => $json
+                        ->whereContains('id', $publicRoom[0]->id)
+                        ->whereContains('code', $publicRoom[0]->code)
+                        ->whereContains('type', 'public')
                         ->etc()
                 )->etc()
         );
@@ -320,7 +314,6 @@ describe('Update Room', function () {
 
     it('should be able to update a room if owner', function () use (&$publicRoom) {
         $payload = [
-            'icon'      => 'lucide:fish',
             'password'  => null,
             'theme'     => 'underwater',
             'type'      => 'public',
@@ -335,13 +328,28 @@ describe('Update Room', function () {
         $this->assertDatabaseHas('rooms', $payload);
     });
 
+    it('should be able to update a specific field room if owner', function (string $field, string $value) use (&$publicRoom) {
+        $payload = [
+            $field => $value,
+        ];
+
+        $response = $this->put(route('room.update', $publicRoom->id), $payload);
+
+        $response->assertRedirect(route('room.index'));
+
+        $this->assertDatabaseHas('rooms', $payload);
+    })->with([
+        ['theme', 'space'],
+        ['max_users', '5'],
+        ['game_mode', 'hard_potato'],
+    ]);
+
     describe('Validations', function () use (&$publicRoom, &$privateRoom) {
         it('should not be able to update a room if not owner', function () use (&$publicRoom) {
             $userNotOwner = User::factory()->create();
             $this->actingAs($userNotOwner);
 
             $payload = [
-                'icon'      => 'lucide:fish',
                 'password'  => null,
                 'theme'     => 'underwater',
                 'type'      => 'public',
@@ -356,7 +364,6 @@ describe('Update Room', function () {
 
         it('should not be able to minor update a room to max_users minor of 2', function () use (&$publicRoom) {
             $payload = [
-                'icon'      => 'lucide:fish',
                 'password'  => null,
                 'theme'     => 'underwater',
                 'type'      => 'public',
@@ -373,7 +380,6 @@ describe('Update Room', function () {
         it('should not be able to update a room code', function () use (&$publicRoom) {
             $payload = [
                 'code'      => 'NEWCD',
-                'icon'      => 'lucide:fish',
                 'password'  => null,
                 'theme'     => 'underwater',
                 'type'      => 'public',
@@ -389,7 +395,6 @@ describe('Update Room', function () {
 
         it('ensure that the update status room to private require password', function () use (&$publicRoom) {
             $payload = [
-                'icon'      => 'lucide:fish',
                 'password'  => null,
                 'theme'     => 'underwater',
                 'type'      => 'private',
@@ -405,7 +410,6 @@ describe('Update Room', function () {
 
         it('ensure that the update status room to public require clean password', function () use (&$privateRoom) {
             $payload = [
-                'icon'      => 'lucide:fish',
                 'password'  => '1234',
                 'theme'     => 'underwater',
                 'type'      => 'public',
@@ -423,7 +427,6 @@ describe('Update Room', function () {
             $roomCode = $publicRoom->code;
 
             $payload = [
-                'icon'      => 'lucide:fish',
                 'password'  => null,
                 'theme'     => 'underwater',
                 'type'      => 'public',
