@@ -49,7 +49,7 @@ final class RoomController extends Controller
 
     public function update(UpdateRoomRequest $request, Room $room)
     {
-        $this->roomService->update($room->id, $request->all());
+        $this->roomService->update($room->id, $request->validated());
 
         return redirect()->intended(route('room.index'));
     }
