@@ -412,7 +412,7 @@ describe('Update Room', function () {
             ['theme', 'space'],
         ]);
 
-        it('ensure that the update status room to private require password', function () use (&$publicRoom) {
+        it('ensure that the update type room to private require password', function () use (&$publicRoom) {
             $payload = [
                 'password'  => null,
                 'theme'     => 'underwater',
@@ -427,7 +427,7 @@ describe('Update Room', function () {
                 ->assertInvalid('password');
         });
 
-        it('ensure that the update status room to public require clean password', function () use (&$privateRoom) {
+        it('ensure that the update type room to public require clean password', function () use (&$privateRoom) {
             $payload = [
                 'password'  => '1234',
                 'theme'     => 'underwater',
