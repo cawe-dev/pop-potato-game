@@ -95,6 +95,38 @@ describe('Create Room', function () {
             'type',
         ]);
 
+        it('should not be able to create a room with more fields than expected', function (string $field, string $value) {
+            $payload = [
+                'icon'      => 'lucide:fish',
+                'password'  => null,
+                'theme'     => 'underwater',
+                'type'      => 'public',
+                'max_users' => '2',
+                'game_mode' => 'default',
+                $field      => $value,
+            ];
+
+            $expectPayload = [
+                'icon'      => 'lucide:fish',
+                'password'  => null,
+                'theme'     => 'underwater',
+                'type'      => 'public',
+                'max_users' => '2',
+                'game_mode' => 'default',
+            ];
+
+            $response = $this->post(route('room.store'), $payload);
+
+            $response->assertRedirect(route('room.index'));
+
+            $this->assertDatabaseHas('rooms', array_merge($expectPayload, ['user_id' => auth()->id()]));
+            $this->assertDatabaseMissing('rooms', [$field => $value]);
+        })->with([
+            ['other_field', 'ABC2'],
+            ['user_id', '4'],
+            ['malicious_field', '8'],
+        ]);
+
         it('should not be able to create a room with user define status', function () {
             $payload = [
                 'icon'      => 'lucide:fish',
