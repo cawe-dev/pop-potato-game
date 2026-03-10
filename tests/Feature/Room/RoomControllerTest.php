@@ -461,5 +461,21 @@ describe('Update Room', function () {
                 'code'    => $roomCode,
             ]));
         });
+
+        it('ensure that the update private room without password in payload', function () use (&$privateRoom) {
+            $roomPassword = $privateRoom->password;
+
+            $payload = [
+                'max_users' => '20',
+            ];
+
+            $this->put(route('room.update', $privateRoom->id), $payload);
+
+            $this->assertDatabaseHas('rooms', array_merge($payload, [
+                'user_id'  => auth()->id(),
+                'id'       => $privateRoom->id,
+                'password' => $roomPassword,
+            ]));
+        });
     });
 });
