@@ -22,13 +22,13 @@ final class UpdateRoomRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'max_users' => 'required|numeric|min:2',
+            'max_users' => 'numeric|min:2',
             'code'      => 'prohibited',
             'password'  => 'required_if:type,private|min:4|string|nullable|prohibited_if:type,public',
-            'theme'     => [Rule::enum(RoomTheme::class), 'required'],
-            'icon'      => 'required|string',
-            'type'      => [Rule::enum(RoomType::class), 'required'],
-            'game_mode' => [Rule::enum(RoomGameMode::class), 'required'],
+            'theme'     => [Rule::enum(RoomTheme::class)],
+            'icon'      => 'prohibited',
+            'type'      => [Rule::enum(RoomType::class)],
+            'game_mode' => [Rule::enum(RoomGameMode::class)],
         ];
     }
 }

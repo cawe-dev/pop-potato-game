@@ -24,7 +24,7 @@ final class StoreRoomRequest extends FormRequest
             'code'      => 'prohibited',
             'password'  => 'required_if:type,private|min:4|string|nullable|prohibited_if:type,public',
             'theme'     => [Rule::enum(RoomTheme::class), 'required'],
-            'icon'      => 'required|string',
+            'icon'      => 'prohibited',
             'type'      => [Rule::enum(RoomType::class), 'required'],
             'game_mode' => [Rule::enum(RoomGameMode::class), 'required'],
         ];
