@@ -243,7 +243,12 @@ describe('Read Room', function () {
         );
     });
 
-    it('should be possible to list specific rooms by id', function () use (&$publicRoom) {
+    it('should not be possible to list non-exist specific rooms by id', function () use (&$publicRoom) {
+        $response = $this->get(route('room.show', 9999999999));
+        $response->assertNotFound();
+    });
+
+    it('should be possible to list specific  rooms by id', function () use (&$publicRoom) {
         $response = $this->get(route('room.show', $publicRoom[0]->id));
         $response->assertOk()
             ->assertJsonFragment([
