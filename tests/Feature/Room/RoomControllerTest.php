@@ -202,7 +202,7 @@ describe('Read Room', function () {
                 ->where('per_page', 15)
                 ->has(
                     'data.0',
-                    fn ($json) => $json->hasAll(collect($publicRoom[0]->getAttributes())->keys()->toArray())
+                    fn ($json) => $json->hasAll(collect($publicRoom[0]->getAttributes())->forget('password')->keys()->toArray())
                         ->where('id', $publicRoom[0]->id)
                         ->where('code', $publicRoom[0]->code)
                         ->where('type', 'public')
@@ -217,6 +217,12 @@ describe('Read Room', function () {
             ->assertJsonFragment([
                 'id' => $publicRoom[0]->id,
             ]);
+    });
+
+    it('ensure that the password not return with room', function () use (&$publicRoom) {
+        $response = $this->get(route('room.show', $publicRoom[0]->id));
+        $response->assertOk()
+            ->assertJson(fn (AssertableJson $json) => $json->missing('password')->etc());
     });
 
     describe('Filter Validation', function () {

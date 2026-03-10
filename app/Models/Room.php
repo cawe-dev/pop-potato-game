@@ -30,6 +30,10 @@ final class Room extends Model
         'user_id',
     ];
 
+    protected $hidden = [
+        'password',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);
