@@ -442,6 +442,18 @@ describe('Update Room', function () {
                 ->assertInvalid('password');
         });
 
+        it('ensure that the update type room to public clear the password', function () use (&$privateRoom) {
+            $payload = [
+                'type' => 'public',
+            ];
+
+            $response = $this->put(route('room.update', $privateRoom->id), $payload);
+
+            $response->assertRedirect(route('room.index'));
+
+            $this->assertDatabaseHas('rooms', array_merge($payload, ['password' => null]));
+        });
+
         it('ensure that the update room does not update the code', function () use (&$publicRoom) {
             $roomCode = $publicRoom->code;
 

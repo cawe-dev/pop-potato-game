@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Room;
 
 use App\Enums\Room\RoomTheme;
+use App\Enums\Room\RoomType;
 use App\Repository\Eloquent\Room\IRoomRepository;
 use App\Services\BaseService;
 use Illuminate\Support\Str;
@@ -18,9 +19,16 @@ final class RoomService extends BaseService implements IRoomService
 
     protected function beforeStore(array $data): array
     {
+        $password = $data['password'];
+
+        if ($data['type'] !== RoomType::PRIVATE->value) {
+            $password = null;
+        }
+
         return array_merge($data, [
-            'code' => $this->generateRoomCode(),
-            'icon' => RoomTheme::from($data['theme'])->icon(),
+            'code'     => $this->generateRoomCode(),
+            'icon'     => RoomTheme::from($data['theme'])->icon(),
+            'password' => $password,
         ]);
     }
 
