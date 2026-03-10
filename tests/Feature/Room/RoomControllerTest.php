@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\Room\RoomGameMode;
+use App\Enums\Room\RoomStatus;
 use App\Enums\Room\RoomTheme;
 use App\Models\Room;
 use App\Models\User;
@@ -308,8 +309,8 @@ describe('Update Room', function () {
     $privateRoom = null;
 
     beforeEach(function () use (&$publicRoom, &$privateRoom) {
-        $publicRoom = Room::factory()->create(['user_id' => auth()->id(), 'type' => 'public']);
-        $privateRoom = Room::factory()->create(['user_id' => auth()->id(), 'type' => 'private']);
+        $publicRoom = Room::factory()->create(['user_id' => auth()->id(), 'type' => 'public', 'status' => 'waiting']);
+        $privateRoom = Room::factory()->create(['user_id' => auth()->id(), 'type' => 'private', 'status' => 'waiting']);
     });
 
     it('should be able to update a room if owner', function () use (&$publicRoom) {
@@ -392,6 +393,24 @@ describe('Update Room', function () {
             $response->assertStatus(302)
                 ->assertInvalid('code');
         });
+
+        it('should not be able to update a room if status not is waiting', function (string $field, string $value) use (&$publicRoom) {
+            $invalidUpdateStatus = [RoomStatus::PLAYING, RoomStatus::FINISHED];
+            $publicRoom->update(['status' => $invalidUpdateStatus[array_rand($invalidUpdateStatus)]]);
+
+            $payload = [
+                $field => $value,
+            ];
+
+            $response = $this->put(route('room.update', $publicRoom->id), $payload);
+
+            $response->assertForbidden();
+        })->with([
+            ['max_users', '5'],
+            ['type', 'private'],
+            ['game_mode', 'default'],
+            ['theme', 'space'],
+        ]);
 
         it('ensure that the update status room to private require password', function () use (&$publicRoom) {
             $payload = [

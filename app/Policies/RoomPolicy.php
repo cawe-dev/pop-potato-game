@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use App\Enums\Room\RoomStatus;
 use App\Models\Room;
 use App\Models\User;
 
@@ -26,7 +27,7 @@ final class RoomPolicy
 
     public function update(?User $user, Room $room): bool
     {
-        return $user->id === $room->user_id;
+        return $user->id === $room->user_id && $room->status === RoomStatus::WAITING;
     }
 
     public function delete(User $user, Room $room): bool
