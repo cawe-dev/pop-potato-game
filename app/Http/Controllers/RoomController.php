@@ -13,11 +13,11 @@ use App\Services\Room\IRoomService;
 
 final class RoomController extends Controller
 {
-    public function __construct(protected IRoomService $roomService) {}
+    public function __construct(protected IRoomService $service) {}
 
     public function index(IndexRoomRequest $request, RoomFilter $filter)
     {
-        return $this->roomService->indexPaginated($filter);
+        return $this->service->indexPaginated($filter);
     }
 
     public function create()
@@ -32,29 +32,29 @@ final class RoomController extends Controller
             'user_id' => auth()->id(),
         ]);
 
-        $this->roomService->store($data);
+        $this->service->store($data);
 
         return redirect()->intended(route('room.index'));
     }
 
-    public function show(Room $room)
+    public function show(int $id)
     {
-        return $this->roomService->show($room->id);
+        return $this->service->show($id);
     }
 
-    public function edit(Room $room)
+    public function edit(int $id)
     {
         //
     }
 
-    public function update(UpdateRoomRequest $request, Room $room)
+    public function update(UpdateRoomRequest $request, int $id)
     {
-        $this->roomService->update($room->id, $request->validated());
+        $this->service->update($id, $request->validated());
 
         return redirect()->intended(route('room.index'));
     }
 
-    public function destroy(Room $room)
+    public function destroy(int $id)
     {
         //
     }
