@@ -25,7 +25,12 @@ final class RoomPolicy
         return false;
     }
 
-    public function update(?User $user, Room $room): bool
+    public function join(User $user, Room $room): bool
+    {
+        return $room->max_users > $room->users()->count();
+    }
+
+    public function update(User $user, Room $room): bool
     {
         return $user->id === $room->user_id && $room->status === RoomStatus::WAITING;
     }

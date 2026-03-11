@@ -21,6 +21,11 @@ final class RoomService extends BaseService implements IRoomService
         parent::__construct($repository);
     }
 
+    public function showByCode(string $code): Room
+    {
+        return $this->repository->findByCode($code);
+    }
+
     public function join(string $code, ?string $password, int $userId): Room
     {
         $room = $this->repository->findByCode($code);

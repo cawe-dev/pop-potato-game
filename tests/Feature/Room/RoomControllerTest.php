@@ -584,5 +584,23 @@ describe('Room Members', function () {
                 'user_id' => auth()->id(),
             ]);
         });
+
+        it('should not be able enter a full room', function () use (&$room) {
+            $room->update(['max_users' => 2]);
+
+            $users = User::factory()->count(2)->create();
+            $room->users()->sync($users->pluck('id'));
+
+            $payload = ['type' => $room->type->value];
+
+            $response = $this->post(route('rooms.join', $room->code), $payload);
+
+            $response->assertForbidden();
+
+            $this->assertDatabaseMissing('room_user', [
+                'room_id' => $room->id,
+                'user_id' => auth()->id(),
+            ]);
+        });
     });
 });
