@@ -11,7 +11,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 abstract class BaseRepository implements IBaseRepository
 {
-    public function __construct(private Model $model) {}
+    public function __construct(protected Model $model) {}
 
     final public function find(int $id)
     {

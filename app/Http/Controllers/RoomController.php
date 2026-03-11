@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Filters\RoomFilter;
+use App\Http\Requests\JoinRoomRequest;
 use App\Http\Requests\Room\IndexRoomRequest;
 use App\Http\Requests\Room\StoreRoomRequest;
 use App\Http\Requests\Room\UpdateRoomRequest;
@@ -39,6 +40,16 @@ final class RoomController extends Controller
     public function show(int $id)
     {
         return $this->service->show($id);
+    }
+
+    public function join(JoinRoomRequest $request, string $code)
+    {
+        $validated = $request->validated();
+        $password = $validated->password ?? null;
+
+        $room = $this->service->join($code, $password, auth()->id());
+
+        return redirect()->intended(route('rooms.show', $room->id));
     }
 
     public function edit(int $id)

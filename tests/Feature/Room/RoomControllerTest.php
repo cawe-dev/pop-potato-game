@@ -218,19 +218,19 @@ describe('Read Room', function () {
 
         $response->assertOk();
         $response->assertJson(
-            fn(AssertableJson $json) => $json
+            fn (AssertableJson $json) => $json
                 ->has('data', 15)
                 ->has('links')
                 ->where('current_page', 1)
                 ->where('per_page', 15)
                 ->has(
                     'data.0',
-                    fn($json) => $json
+                    fn ($json) => $json
                         ->hasAll(collect($publicRoom[0]->getAttributes())->forget('password')->keys()->toArray())
                 )
                 ->has(
                     'data',
-                    fn($json) => $json
+                    fn ($json) => $json
                         ->whereContains('id', $publicRoom[0]->id)
                         ->whereContains('code', $publicRoom[0]->code)
                         ->whereContains('type', 'public')
@@ -255,7 +255,7 @@ describe('Read Room', function () {
     it('ensure that the password not return with room', function () use (&$publicRoom) {
         $response = $this->get(route('rooms.show', $publicRoom[0]->id));
         $response->assertOk()
-            ->assertJson(fn(AssertableJson $json) => $json->missing('password')->etc());
+            ->assertJson(fn (AssertableJson $json) => $json->missing('password')->etc());
     });
 
     describe('Filter Validation', function () {
@@ -493,6 +493,21 @@ describe('Update Room', function () {
 });
 
 describe('Room Members', function () {
+
+    it('should be able enter in public room without password', function () {
+        $room = Room::factory()->create(['user_id' => auth()->id(), 'status' => 'waiting', 'type' => 'public']);
+        $payload = ['type' => $room->type->value];
+
+        $response = $this->post(route('rooms.join', $room->code), $payload);
+
+        $response->assertRedirect(route('rooms.show', $room->id));
+
+        $this->assertDatabaseHas('room_user', [
+            'room_id' => $room->id,
+            'user_id' => auth()->id(),
+        ]);
+    });
+
     it('ensure that room owner join in room when created', function () {
         $payload = [
             'password'  => null,
@@ -510,26 +525,64 @@ describe('Room Members', function () {
         $this->assertDatabaseHas('room_user', ['room_id' => 1, 'user_id' => auth()->id()]);
     });
 
-    it('ensure that delete room if empty', function () {
-        $user = User::factory()->create();
-        $room = Room::factory()->create(['user_id' => $user->id]);
+    describe('Validations', function () {
+        $room = null;
 
-        $room->users()->attach($user->id);
+        beforeEach(function () use (&$room) {
+            $room = Room::factory()->create([
+                'user_id' => auth()->id(),
+                'type'    => 'public',
+                'status'  => 'waiting',
+            ]);
+        });
 
-        $this->assertDatabaseHas('rooms', ['id' => $room->id]);
-        $this->assertDatabaseHas('room_user', [
-            'room_id' => $room->id,
-            'user_id' => $user->id,
-        ]);
+        it('ensure that delete room if empty', function () use (&$room) {
+            $room->users()->attach(auth()->id());
 
-        $leaveRoomAction = app(LeaveRoom::class);
-        $leaveRoomAction($room, $user->id);
+            $this->assertDatabaseHas('rooms', ['id' => $room->id]);
+            $this->assertDatabaseHas('room_user', [
+                'room_id' => $room->id,
+                'user_id' => auth()->id(),
+            ]);
 
-        $this->assertDatabaseMissing('rooms', ['id' => $room->id]);
+            $leaveRoomAction = app(LeaveRoom::class);
+            $leaveRoomAction($room, auth()->id());
 
-        $this->assertDatabaseMissing('room_user', [
-            'room_id' => $room->id,
-            'user_id' => $user->id,
-        ]);
+            $this->assertDatabaseMissing('rooms', ['id' => $room->id]);
+
+            $this->assertDatabaseMissing('room_user', [
+                'room_id' => $room->id,
+                'user_id' => auth()->id(),
+            ]);
+        });
+
+        it('should not be able enter a private room without password', function () use (&$room) {
+            $room->update(['type' => 'private']);
+            $payload = ['type' => $room->type->value];
+
+            $response = $this->post(route('rooms.join', $room->code), $payload);
+
+            $response->assertFound()
+                ->assertInvalid('password');
+
+            $this->assertDatabaseMissing('room_user', [
+                'room_id' => $room->id,
+                'user_id' => auth()->id(),
+            ]);
+        });
+
+        it('should be able enter a private room with password', function () use (&$room) {
+            $room->update(['type' => 'private', 'password' => '1234']);
+            $payload = ['type' => $room->type->value, 'password' => $room->password];
+
+            $response = $this->post(route('rooms.join', $room->code), $payload);
+
+            $response->assertRedirect(route('rooms.show', $room->id));
+
+            $this->assertDatabaseHas('room_user', [
+                'room_id' => $room->id,
+                'user_id' => auth()->id(),
+            ]);
+        });
     });
 });

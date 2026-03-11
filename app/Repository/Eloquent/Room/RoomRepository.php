@@ -13,4 +13,9 @@ final class RoomRepository extends BaseRepository implements IRoomRepository
     {
         parent::__construct($model);
     }
+
+    public function findByCode(string $code): Room
+    {
+        return $this->model->where('code', $code)->firstOrFail();
+    }
 }

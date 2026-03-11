@@ -7,8 +7,10 @@ namespace App\Services\Room;
 use App\Actions\room\JoinRoom;
 use App\Enums\Room\RoomTheme;
 use App\Enums\Room\RoomType;
+use App\Models\Room;
 use App\Repository\Eloquent\Room\IRoomRepository;
 use App\Services\BaseService;
+use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
@@ -17,6 +19,21 @@ final class RoomService extends BaseService implements IRoomService
     public function __construct(IRoomRepository $repository, private JoinRoom $join)
     {
         parent::__construct($repository);
+    }
+
+    public function join(string $code, ?string $password, int $userId): Room
+    {
+        $room = $this->repository->findByCode($code);
+
+        throw_if(
+            !empty($password) && $room->password !== $password,
+            Exception::class,
+            'invalid password'
+        );
+
+        ($this->join)($room, $userId);
+
+        return $room;
     }
 
     protected function beforeStore(array $data): array
@@ -31,9 +48,9 @@ final class RoomService extends BaseService implements IRoomService
         ];
     }
 
-    protected function afterStore(Model $model, array $data): void
+    protected function afterStore(Model $room, array $data): void
     {
-        ($this->join)($model, $data['user_id']);
+        ($this->join)($room, $data['user_id']);
     }
 
     protected function beforeUpdate(array $data): array
