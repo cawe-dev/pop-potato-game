@@ -13,7 +13,8 @@ Route::inertia('/', 'Welcome', [
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'Dashboard')->name('dashboard');
-    Route::resource('/room', RoomController::class);
+    Route::resource('/rooms', RoomController::class);
+    Route::post('/rooms/{code}/join', [RoomController::class, 'join'])->name('rooms.join');
 });
 
 Route::post('/guest-login', GuestSessionController::class)->name('guest-login');

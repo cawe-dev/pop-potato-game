@@ -26,9 +26,9 @@ describe('Create Room', function () {
             'game_mode' => 'default',
         ];
 
-        $response = $this->post(route('room.store'), $payload);
+        $response = $this->post(route('rooms.store'), $payload);
 
-        $response->assertRedirect(route('room.index'));
+        $response->assertRedirect(route('rooms.index'));
 
         $this->assertDatabaseHas('rooms', array_merge($payload, ['user_id' => auth()->id()]));
     });
@@ -42,9 +42,9 @@ describe('Create Room', function () {
             'game_mode' => 'default',
         ];
 
-        $response = $this->post(route('room.store'), $payload);
+        $response = $this->post(route('rooms.store'), $payload);
 
-        $response->assertRedirect(route('room.index'));
+        $response->assertRedirect(route('rooms.index'));
 
         $this->assertDatabaseHas('rooms', array_merge($payload, ['user_id' => auth()->id()]));
     });
@@ -65,9 +65,9 @@ describe('Create Room', function () {
             'game_mode' => 'default',
         ];
 
-        $response = $this->post(route('room.store'), $payload);
+        $response = $this->post(route('rooms.store'), $payload);
 
-        $response->assertRedirect(route('room.index'));
+        $response->assertRedirect(route('rooms.index'));
 
         $this->assertDatabaseHas('rooms', array_merge($payload, ['user_id' => $guestUser->id]));
     });
@@ -83,7 +83,7 @@ describe('Create Room', function () {
             ];
             unset($payload[$field]);
 
-            $response = $this->post(route('room.store'), $payload);
+            $response = $this->post(route('rooms.store'), $payload);
 
             $response->assertStatus(302)
                 ->assertInvalid($field);
@@ -111,9 +111,9 @@ describe('Create Room', function () {
                 'game_mode' => 'default',
             ];
 
-            $response = $this->post(route('room.store'), $payload);
+            $response = $this->post(route('rooms.store'), $payload);
 
-            $response->assertRedirect(route('room.index'));
+            $response->assertRedirect(route('rooms.index'));
 
             $this->assertDatabaseHas('rooms', array_merge($expectPayload, ['user_id' => auth()->id()]));
             $this->assertDatabaseMissing('rooms', [$field => $value]);
@@ -133,9 +133,9 @@ describe('Create Room', function () {
                 'status'    => 'playing',
             ];
 
-            $response = $this->post(route('room.store'), $payload);
+            $response = $this->post(route('rooms.store'), $payload);
 
-            $response->assertRedirect(route('room.index'));
+            $response->assertRedirect(route('rooms.index'));
 
             $this->assertDatabaseHas('rooms', [
                 'status' => 'waiting',
@@ -151,7 +151,7 @@ describe('Create Room', function () {
                 'max_users' => '1',
             ];
 
-            $response = $this->post(route('room.store'), $payload);
+            $response = $this->post(route('rooms.store'), $payload);
 
             $response->assertStatus(302)
                 ->assertInvalid('max_users');
@@ -166,7 +166,7 @@ describe('Create Room', function () {
                 'max_users' => '2',
             ];
 
-            $response = $this->post(route('room.store'), $payload);
+            $response = $this->post(route('rooms.store'), $payload);
 
             $response->assertStatus(302)
                 ->assertInvalid('password');
@@ -181,7 +181,7 @@ describe('Create Room', function () {
                 'game_mode' => 'default',
             ];
 
-            $response = $this->post(route('room.store'), $payload);
+            $response = $this->post(route('rooms.store'), $payload);
 
             $response->assertStatus(302)
                 ->assertInvalid('password');
@@ -196,7 +196,7 @@ describe('Create Room', function () {
                 'game_mode' => 'default',
             ];
 
-            $response = $this->post(route('room.store'), $payload);
+            $response = $this->post(route('rooms.store'), $payload);
 
             $response->assertStatus(302)
                 ->assertInvalid('password');
@@ -214,23 +214,23 @@ describe('Read Room', function () {
     });
 
     it('should be able to list all rooms with pagination', function () use (&$publicRoom) {
-        $response = $this->get(route('room.index'));
+        $response = $this->get(route('rooms.index'));
 
         $response->assertOk();
         $response->assertJson(
-            fn (AssertableJson $json) => $json
+            fn(AssertableJson $json) => $json
                 ->has('data', 15)
                 ->has('links')
                 ->where('current_page', 1)
                 ->where('per_page', 15)
                 ->has(
                     'data.0',
-                    fn ($json) => $json
+                    fn($json) => $json
                         ->hasAll(collect($publicRoom[0]->getAttributes())->forget('password')->keys()->toArray())
                 )
                 ->has(
                     'data',
-                    fn ($json) => $json
+                    fn($json) => $json
                         ->whereContains('id', $publicRoom[0]->id)
                         ->whereContains('code', $publicRoom[0]->code)
                         ->whereContains('type', 'public')
@@ -240,12 +240,12 @@ describe('Read Room', function () {
     });
 
     it('should not be possible to list non-exist specific rooms by id', function () use (&$publicRoom) {
-        $response = $this->get(route('room.show', 9999999999));
+        $response = $this->get(route('rooms.show', 9999999999));
         $response->assertNotFound();
     });
 
     it('should be possible to list specific  rooms by id', function () use (&$publicRoom) {
-        $response = $this->get(route('room.show', $publicRoom[0]->id));
+        $response = $this->get(route('rooms.show', $publicRoom[0]->id));
         $response->assertOk()
             ->assertJsonFragment([
                 'id' => $publicRoom[0]->id,
@@ -253,16 +253,16 @@ describe('Read Room', function () {
     });
 
     it('ensure that the password not return with room', function () use (&$publicRoom) {
-        $response = $this->get(route('room.show', $publicRoom[0]->id));
+        $response = $this->get(route('rooms.show', $publicRoom[0]->id));
         $response->assertOk()
-            ->assertJson(fn (AssertableJson $json) => $json->missing('password')->etc());
+            ->assertJson(fn(AssertableJson $json) => $json->missing('password')->etc());
     });
 
     describe('Filter Validation', function () {
         it('filters rooms by simple fields', function ($field, $value) {
             Room::factory()->create([$field => $value]);
 
-            $this->get(route('room.index', [$field => $value]))
+            $this->get(route('rooms.index', [$field => $value]))
                 ->assertOk()
                 ->assertJsonPath("data.0.$field", $value);
         })->with([
@@ -274,7 +274,7 @@ describe('Read Room', function () {
             Room::factory()->create(['theme' => RoomTheme::UNDERWATER, 'type' => 'public']);
             Room::factory()->create(['theme' => RoomTheme::FILMS, 'type' => 'public']);
 
-            $response = $this->get(route('room.index', ['theme' => [RoomTheme::UNDERWATER->value]]));
+            $response = $this->get(route('rooms.index', ['theme' => [RoomTheme::UNDERWATER->value]]));
 
             $response->assertOk()
                 ->assertJsonCount(1, 'data')
@@ -284,14 +284,14 @@ describe('Read Room', function () {
         it('should filter rooms by game mode', function () {
             Room::factory()->create(['game_mode' => RoomGameMode::HARD_POTATO]);
 
-            $response = $this->get(route('room.index', ['game_mode' => [RoomGameMode::HARD_POTATO->value]]));
+            $response = $this->get(route('rooms.index', ['game_mode' => [RoomGameMode::HARD_POTATO->value]]));
 
             $response->assertOk()
                 ->assertJsonPath('data.0.game_mode', RoomGameMode::HARD_POTATO->value);
         });
 
         it('should not be able to list rooms if the filters are invalid', function (string $field, $value) {
-            $response = $this->get(route('room.index', [$field => $value]));
+            $response = $this->get(route('rooms.index', [$field => $value]));
 
             $response->assertStatus(302);
             $response->isInvalid($field);
@@ -323,9 +323,9 @@ describe('Update Room', function () {
             'game_mode' => 'default',
         ];
 
-        $response = $this->put(route('room.update', $publicRoom->id), $payload);
+        $response = $this->put(route('rooms.update', $publicRoom->id), $payload);
 
-        $response->assertRedirect(route('room.index'));
+        $response->assertRedirect(route('rooms.index'));
 
         $this->assertDatabaseHas('rooms', $payload);
     });
@@ -335,9 +335,9 @@ describe('Update Room', function () {
             $field => $value,
         ];
 
-        $response = $this->put(route('room.update', $publicRoom->id), $payload);
+        $response = $this->put(route('rooms.update', $publicRoom->id), $payload);
 
-        $response->assertRedirect(route('room.index'));
+        $response->assertRedirect(route('rooms.index'));
 
         $this->assertDatabaseHas('rooms', $payload);
     })->with([
@@ -359,7 +359,7 @@ describe('Update Room', function () {
                 'game_mode' => 'default',
             ];
 
-            $response = $this->put(route('room.update', $publicRoom->id), $payload);
+            $response = $this->put(route('rooms.update', $publicRoom->id), $payload);
 
             $response->assertStatus(403);
         });
@@ -373,7 +373,7 @@ describe('Update Room', function () {
                 'game_mode' => 'default',
             ];
 
-            $response = $this->put(route('room.update', $publicRoom->id), $payload);
+            $response = $this->put(route('rooms.update', $publicRoom->id), $payload);
 
             $response->assertStatus(302)
                 ->assertInvalid('max_users');
@@ -389,7 +389,7 @@ describe('Update Room', function () {
                 'game_mode' => 'default',
             ];
 
-            $response = $this->put(route('room.update', $publicRoom->id), $payload);
+            $response = $this->put(route('rooms.update', $publicRoom->id), $payload);
 
             $response->assertStatus(302)
                 ->assertInvalid('code');
@@ -403,7 +403,7 @@ describe('Update Room', function () {
                 $field => $value,
             ];
 
-            $response = $this->put(route('room.update', $publicRoom->id), $payload);
+            $response = $this->put(route('rooms.update', $publicRoom->id), $payload);
 
             $response->assertForbidden();
         })->with([
@@ -422,7 +422,7 @@ describe('Update Room', function () {
                 'game_mode' => 'default',
             ];
 
-            $response = $this->put(route('room.update', $publicRoom->id), $payload);
+            $response = $this->put(route('rooms.update', $publicRoom->id), $payload);
 
             $response->assertStatus(302)
                 ->assertInvalid('password');
@@ -437,7 +437,7 @@ describe('Update Room', function () {
                 'game_mode' => 'default',
             ];
 
-            $response = $this->put(route('room.update', $privateRoom->id), $payload);
+            $response = $this->put(route('rooms.update', $privateRoom->id), $payload);
 
             $response->assertStatus(302)
                 ->assertInvalid('password');
@@ -448,9 +448,9 @@ describe('Update Room', function () {
                 'type' => 'public',
             ];
 
-            $response = $this->put(route('room.update', $privateRoom->id), $payload);
+            $response = $this->put(route('rooms.update', $privateRoom->id), $payload);
 
-            $response->assertRedirect(route('room.index'));
+            $response->assertRedirect(route('rooms.index'));
 
             $this->assertDatabaseHas('rooms', array_merge($payload, ['id' => $privateRoom->id, 'password' => null]));
         });
@@ -466,7 +466,7 @@ describe('Update Room', function () {
                 'game_mode' => 'default',
             ];
 
-            $this->put(route('room.update', $publicRoom->id), $payload);
+            $this->put(route('rooms.update', $publicRoom->id), $payload);
 
             $this->assertDatabaseHas('rooms', array_merge($payload, [
                 'user_id' => auth()->id(),
@@ -481,7 +481,7 @@ describe('Update Room', function () {
                 'max_users' => '20',
             ];
 
-            $this->put(route('room.update', $privateRoom->id), $payload);
+            $this->put(route('rooms.update', $privateRoom->id), $payload);
 
             $this->assertDatabaseHas('rooms', array_merge($payload, [
                 'user_id'  => auth()->id(),
@@ -502,9 +502,9 @@ describe('Room Members', function () {
             'game_mode' => 'default',
         ];
 
-        $response = $this->post(route('room.store'), $payload);
+        $response = $this->post(route('rooms.store'), $payload);
 
-        $response->assertRedirect(route('room.index'));
+        $response->assertRedirect(route('rooms.index'));
 
         $this->assertDatabaseHas('rooms', array_merge($payload, ['user_id' => auth()->id()]));
         $this->assertDatabaseHas('room_user', ['room_id' => 1, 'user_id' => auth()->id()]);

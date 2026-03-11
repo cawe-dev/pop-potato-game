@@ -33,7 +33,7 @@ final class RoomController extends Controller
 
         $this->service->store($data);
 
-        return redirect()->intended(route('room.index'));
+        return redirect()->intended(route('rooms.index'));
     }
 
     public function show(int $id)
@@ -50,7 +50,7 @@ final class RoomController extends Controller
     {
         $this->service->update($id, $request->validated());
 
-        return redirect()->intended(route('room.index'));
+        return redirect()->intended(route('rooms.index'));
     }
 
     public function destroy(int $id)
