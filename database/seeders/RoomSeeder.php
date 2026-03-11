@@ -15,6 +15,9 @@ final class RoomSeeder extends Seeder
      */
     public function run(): void
     {
-        Room::factory()->count(10)->recycle(User::all())->create();
+        Room::factory()->count(10)
+            ->recycle(User::all())
+            ->hasAttached(User::factory()->count(3))
+            ->create();
     }
 }
