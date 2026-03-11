@@ -33,12 +33,22 @@ abstract class BaseService
     {
         $data = $this->beforeStore($data);
 
-        return $this->repository->create($data);
+        $model = $this->repository->create($data);
+
+        $this->afterStore($model, $data);
+
+        return $model;
     }
 
     final public function update(int $id, array $data): Model
     {
-        return $this->repository->update($id, $data);
+        $data = $this->beforeUpdate($data);
+
+        $model = $this->repository->update($id, $data);
+
+        $this->afterUpdate($model, $data);
+
+        return $model;
     }
 
     final public function destroy(int $id): bool
@@ -49,5 +59,20 @@ abstract class BaseService
     protected function beforeStore(array $data): array
     {
         return $data;
+    }
+
+    protected function afterStore(Model $model, array $data): void
+    {
+        //
+    }
+
+    protected function beforeUpdate(array $data): array
+    {
+        return $data;
+    }
+
+    protected function afterUpdate(Model $model, array $data): void
+    {
+        //
     }
 }

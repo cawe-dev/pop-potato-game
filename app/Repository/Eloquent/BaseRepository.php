@@ -15,7 +15,7 @@ abstract class BaseRepository implements IBaseRepository
 
     final public function find(int $id)
     {
-        return $this->model->find($id);
+        return $this->model->findOrFail($id);
     }
 
     final public function findAll()
