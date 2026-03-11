@@ -8,7 +8,6 @@ use App\Filters\RoomFilter;
 use App\Http\Requests\Room\IndexRoomRequest;
 use App\Http\Requests\Room\StoreRoomRequest;
 use App\Http\Requests\Room\UpdateRoomRequest;
-use App\Models\Room;
 use App\Services\Room\IRoomService;
 
 final class RoomController extends Controller

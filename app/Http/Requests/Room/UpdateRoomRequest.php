@@ -7,14 +7,18 @@ namespace App\Http\Requests\Room;
 use App\Enums\Room\RoomGameMode;
 use App\Enums\Room\RoomTheme;
 use App\Enums\Room\RoomType;
+use App\Services\Room\IRoomService;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 final class UpdateRoomRequest extends FormRequest
 {
+    public function __construct(protected IRoomService $service) {}
+
     public function authorize(): bool
     {
-        $room = $this->route('room');
+        $roomId = (int) $this->route('room');
+        $room = $this->service->show($roomId);
 
         return $this->user()->can('update', $room);
     }
