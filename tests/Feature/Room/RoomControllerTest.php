@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Actions\room\LeaveRoom;
 use App\Enums\Room\RoomGameMode;
 use App\Enums\Room\RoomStatus;
 use App\Enums\Room\RoomTheme;
@@ -451,7 +452,7 @@ describe('Update Room', function () {
 
             $response->assertRedirect(route('room.index'));
 
-            $this->assertDatabaseHas('rooms', array_merge($payload, ['password' => null]));
+            $this->assertDatabaseHas('rooms', array_merge($payload, ['id' => $privateRoom->id, 'password' => null]));
         });
 
         it('ensure that the update room does not update the code', function () use (&$publicRoom) {
@@ -476,7 +477,6 @@ describe('Update Room', function () {
 
         it('ensure that the update private room without password in payload', function () use (&$privateRoom) {
             $roomPassword = $privateRoom->password;
-
             $payload = [
                 'max_users' => '20',
             ];
@@ -489,5 +489,47 @@ describe('Update Room', function () {
                 'password' => $roomPassword,
             ]));
         });
+    });
+});
+
+describe('Room Members', function () {
+    it('ensure that room owner join in room when created', function () {
+        $payload = [
+            'password'  => null,
+            'theme'     => 'underwater',
+            'type'      => 'public',
+            'max_users' => '2',
+            'game_mode' => 'default',
+        ];
+
+        $response = $this->post(route('room.store'), $payload);
+
+        $response->assertRedirect(route('room.index'));
+
+        $this->assertDatabaseHas('rooms', array_merge($payload, ['user_id' => auth()->id()]));
+        $this->assertDatabaseHas('room_user', ['room_id' => 1, 'user_id' => auth()->id()]);
+    });
+
+    it('ensure that delete room if empty', function () {
+        $user = User::factory()->create();
+        $room = Room::factory()->create(['user_id' => $user->id]);
+
+        $room->users()->attach($user->id);
+
+        $this->assertDatabaseHas('rooms', ['id' => $room->id]);
+        $this->assertDatabaseHas('room_user', [
+            'room_id' => $room->id,
+            'user_id' => $user->id,
+        ]);
+
+        $leaveRoomAction = app(LeaveRoom::class);
+        $leaveRoomAction($room, $user->id);
+
+        $this->assertDatabaseMissing('rooms', ['id' => $room->id]);
+
+        $this->assertDatabaseMissing('room_user', [
+            'room_id' => $room->id,
+            'user_id' => $user->id,
+        ]);
     });
 });
