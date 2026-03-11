@@ -12,6 +12,8 @@ use App\Filters\QueryFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 final class Room extends Model
 {
@@ -34,7 +36,7 @@ final class Room extends Model
         'password',
     ];
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
@@ -42,6 +44,12 @@ final class Room extends Model
     public function scopeFilter(Builder $query, QueryFilter $filters): Builder
     {
         return $filters->apply($query);
+    }
+
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class)
+            ->withTimestamps();
     }
 
     protected function casts(): array
