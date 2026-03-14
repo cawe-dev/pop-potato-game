@@ -49,7 +49,8 @@ final class Room extends Model
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class)
-            ->withTimestamps();
+            ->withTimestamps()
+            ->orderBy('room_user.created_at', 'asc');
     }
 
     protected function casts(): array

@@ -11,4 +11,6 @@ interface IRoomService
     public function showByCode(string $code): Room;
 
     public function join(string $code, ?string $password, int $userId): Room;
+
+    public function nextOwner(Room $room): Room;
 }

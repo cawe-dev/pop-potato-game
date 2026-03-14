@@ -602,5 +602,26 @@ describe('Room Members', function () {
                 'user_id' => auth()->id(),
             ]);
         });
+
+        it('ensure that have a new owner when user owner left room', function () use (&$room) {
+            $newUser = User::factory()->create();
+            $users = collect($newUser->pluck('id'))->add(auth()->id());
+
+            $room->users()->sync($users);
+
+            $response = $this->delete(route('rooms.leave', $room->code));
+
+            $response->assertOk();
+
+            $this->assertDatabaseHas('rooms', [
+                'id'      => $room->id,
+                'user_id' => $newUser->id,
+            ]);
+
+            $this->assertDatabaseHas('room_user', [
+                'room_id' => $room->id,
+                'user_id' => $newUser->id,
+            ]);
+        });
     });
 });

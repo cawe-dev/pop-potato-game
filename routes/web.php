@@ -15,6 +15,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'Dashboard')->name('dashboard');
     Route::resource('/rooms', RoomController::class);
     Route::post('/rooms/{code}', [RoomController::class, 'join'])->name('rooms.join');
+    Route::delete('/rooms/{code}/leave', [RoomController::class, 'leave'])->name('rooms.leave');
 });
 
 Route::post('/guest-login', GuestSessionController::class)->name('guest-login');

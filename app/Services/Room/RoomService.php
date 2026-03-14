@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Room;
 
 use App\Actions\room\JoinRoom;
+use App\Actions\room\LeaveRoom;
 use App\Enums\Room\RoomTheme;
 use App\Enums\Room\RoomType;
 use App\Models\Room;
@@ -16,7 +17,7 @@ use Illuminate\Support\Str;
 
 final class RoomService extends BaseService implements IRoomService
 {
-    public function __construct(IRoomRepository $repository, private JoinRoom $join)
+    public function __construct(IRoomRepository $repository, private JoinRoom $join, private LeaveRoom $leave)
     {
         parent::__construct($repository);
     }
@@ -39,6 +40,23 @@ final class RoomService extends BaseService implements IRoomService
         ($this->join)($room, $userId);
 
         return $room;
+    }
+
+    public function leave(string $code, int $userId): void
+    {
+        $room = $this->repository->findByCode($code);
+        ($this->leave)($room, $userId);
+    }
+
+    public function nextOwner(Room $room): Room
+    {
+        $nextOwner = $this->repository->findFirstMember($room->id);
+
+        if (!$nextOwner) {
+            return $room;
+        }
+
+        return $this->repository->newOwner($room->id, $nextOwner->id);
     }
 
     protected function beforeStore(array $data): array

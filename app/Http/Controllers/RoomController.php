@@ -52,6 +52,11 @@ final class RoomController extends Controller
         return redirect()->intended(route('rooms.show', $room->id));
     }
 
+    public function leave(string $code)
+    {
+        $this->service->leave($code, auth()->id());
+    }
+
     public function edit(int $id)
     {
         //
