@@ -27,12 +27,17 @@ final class RoomPolicy
 
     public function join(User $user, Room $room): bool
     {
-        return $room->max_users > $room->users()->count();
+        return $room->max_users > $room->users()->count() && $room->status !== RoomStatus::FINISHED;
     }
 
     public function update(User $user, Room $room): bool
     {
         return $user->id === $room->user_id && $room->status === RoomStatus::WAITING;
+    }
+
+    public function kick(User $user, Room $room): bool
+    {
+        return $user->id === $room->user_id && $room->status !== RoomStatus::FINISHED;
     }
 
     public function delete(User $user, Room $room): bool

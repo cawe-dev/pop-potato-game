@@ -623,5 +623,31 @@ describe('Room Members', function () {
                 'user_id' => $newUser->id,
             ]);
         });
+
+        it('should be able kick user if owner', function () use (&$room) {
+            $newUser = User::factory()->create();
+            $users = collect($newUser->pluck('id'))->add(auth()->id());
+
+            $room->users()->sync($users);
+
+            $response = $this->delete(route('rooms.kick', [$room->code, $newUser->id]));
+
+            $response->assertOk();
+
+            $this->assertDatabaseHas('rooms', [
+                'id'      => $room->id,
+                'user_id' => auth()->id(),
+            ]);
+
+            $this->assertDatabaseHas('room_user', [
+                'room_id' => $room->id,
+                'user_id' => auth()->id(),
+            ]);
+
+            $this->assertDatabaseMissing('room_user', [
+                'room_id' => $room->id,
+                'user_id' => $newUser->id,
+            ]);
+        });
     });
 });

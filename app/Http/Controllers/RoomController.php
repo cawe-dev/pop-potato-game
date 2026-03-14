@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Filters\RoomFilter;
 use App\Http\Requests\JoinRoomRequest;
 use App\Http\Requests\Room\IndexRoomRequest;
+use App\Http\Requests\Room\KickRoomRequest;
 use App\Http\Requests\Room\StoreRoomRequest;
 use App\Http\Requests\Room\UpdateRoomRequest;
 use App\Services\Room\IRoomService;
@@ -55,6 +56,11 @@ final class RoomController extends Controller
     public function leave(string $code)
     {
         $this->service->leave($code, auth()->id());
+    }
+
+    public function kick(KickRoomRequest $request, string $code, int $userId)
+    {
+        $this->service->leave($code, $userId);
     }
 
     public function edit(int $id)
