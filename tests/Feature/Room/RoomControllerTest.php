@@ -674,4 +674,46 @@ describe('Room Members', function () {
             ]);
         });
     });
+
+    describe('Start Match Validations', function () {
+        $room = null;
+
+        beforeEach(function () use (&$room) {
+            $room = Room::factory()->create([
+                'user_id' => auth()->id(),
+                'type'    => 'public',
+                'status'  => 'waiting',
+            ]);
+        });
+
+        it('should not be able starting a match with only 1 player', function () use (&$room) {
+            $room->users()->sync(auth()->id());
+
+            $payload = ['status' => RoomStatus::PLAYING->value];
+            $response = $this->put(route('rooms.update', $room->id), $payload);
+
+            $response->assertStatus(302)
+                ->assertInvalid('status');
+
+            $this->assertDatabaseHas('rooms', [
+                'id'     => $room->id,
+                'status' => RoomStatus::WAITING->value,
+            ]);
+        });
+
+        it('should be able starting a match with 2 or more players', function () use (&$room) {
+            $newUser = User::factory()->create();
+            $room->users()->sync([$newUser->id, auth()->id()]);
+
+            $payload = ['status' => RoomStatus::PLAYING->value];
+            $response = $this->put(route('rooms.update', $room->id), $payload);
+
+            $response->assertRedirect(route('rooms.index'));
+
+            $this->assertDatabaseHas('rooms', [
+                'id'     => $room->id,
+                'status' => RoomStatus::PLAYING->value,
+            ]);
+        });
+    });
 });
