@@ -245,7 +245,7 @@ describe('Read Room', function () {
     });
 
     it('should be possible to list specific  rooms by id', function () use (&$publicRoom) {
-        $response = $this->get(route('rooms.show', $publicRoom[0]->id));
+        $response = $this->get(route('rooms.show', $publicRoom[0]->code));
         $response->assertOk()
             ->assertJsonFragment([
                 'id' => $publicRoom[0]->id,
@@ -253,7 +253,7 @@ describe('Read Room', function () {
     });
 
     it('ensure that the password not return with room', function () use (&$publicRoom) {
-        $response = $this->get(route('rooms.show', $publicRoom[0]->id));
+        $response = $this->get(route('rooms.show', $publicRoom[0]->code));
         $response->assertOk()
             ->assertJson(fn (AssertableJson $json) => $json->missing('password')->etc());
     });

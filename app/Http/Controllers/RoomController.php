@@ -40,9 +40,9 @@ final class RoomController extends Controller
         return redirect()->intended(route('rooms.index'));
     }
 
-    public function show(int $id)
+    public function show(string $code)
     {
-        return $this->service->show($id);
+        return $this->service->showByCode($code);
     }
 
     public function join(JoinRoomRequest $request, string $code)
