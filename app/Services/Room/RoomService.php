@@ -7,6 +7,7 @@ namespace App\Services\Room;
 use App\Actions\room\JoinRoom;
 use App\Actions\room\LeaveRoom;
 use App\Enums\Room\RoomTheme;
+use App\Enums\Room\RoomTransferOwner;
 use App\Enums\Room\RoomType;
 use App\Models\Room;
 use App\Repository\Eloquent\Room\IRoomRepository;
@@ -14,6 +15,7 @@ use App\Services\BaseService;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 
 final class RoomService extends BaseService implements IRoomService
 {
@@ -48,15 +50,29 @@ final class RoomService extends BaseService implements IRoomService
         ($this->leave)($room, $userId);
     }
 
-    public function nextOwner(Room $room): Room
+    public function nextOwner(Room $room, RoomTransferOwner $rule = RoomTransferOwner::AUTO, ?int $userId = null): Room
     {
-        $nextOwner = $this->repository->findFirstMember($room->id);
+        $nextOwnerId = match ($rule) {
+            RoomTransferOwner::MANUAL => $userId ?? throw new InvalidArgumentException('Require user id'),
+            RoomTransferOwner::AUTO   => $this->repository->findFirstMember($room->id)?->id,
+        };
 
-        if (!$nextOwner) {
+        if (!$nextOwnerId) {
             return $room;
         }
 
-        return $this->repository->newOwner($room->id, $nextOwner->id);
+        return $this->repository->newOwner($room->id, $nextOwnerId);
+    }
+
+    public function nextOwnerByCode(string $code, RoomTransferOwner $rule = RoomTransferOwner::AUTO, ?int $userId = null): Room
+    {
+        $room = $this->showByCode($code);
+
+        return $this->nextOwner(
+            $room,
+            $rule,
+            $userId
+        );
     }
 
     protected function beforeStore(array $data): array

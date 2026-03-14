@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Enums\Room\RoomTransferOwner;
 use App\Filters\RoomFilter;
 use App\Http\Requests\JoinRoomRequest;
+use App\Http\Requests\NewOwnerRoomRequest;
 use App\Http\Requests\Room\IndexRoomRequest;
 use App\Http\Requests\Room\KickRoomRequest;
 use App\Http\Requests\Room\StoreRoomRequest;
@@ -61,6 +63,11 @@ final class RoomController extends Controller
     public function kick(KickRoomRequest $request, string $code, int $userId)
     {
         $this->service->leave($code, $userId);
+    }
+
+    public function newOwner(NewOwnerRoomRequest $request, string $code, int $userId)
+    {
+        $this->service->nextOwnerByCode($code, RoomTransferOwner::MANUAL, $userId);
     }
 
     public function edit(int $id)

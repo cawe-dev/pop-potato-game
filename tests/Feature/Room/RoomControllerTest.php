@@ -649,5 +649,29 @@ describe('Room Members', function () {
                 'user_id' => $newUser->id,
             ]);
         });
+
+        it('should be able pass owner status if owner', function () use (&$room) {
+            $newUser = User::factory()->create();
+            $room->users()->sync([$newUser->id, auth()->id()]);
+
+            $response = $this->post(route('rooms.newOwner', [$room->code, $newUser->id]));
+
+            $response->assertOk();
+
+            $this->assertDatabaseHas('rooms', [
+                'id'      => $room->id,
+                'user_id' => $newUser->id,
+            ]);
+
+            $this->assertDatabaseHas('room_user', [
+                'room_id' => $room->id,
+                'user_id' => $newUser->id,
+            ]);
+
+            $this->assertDatabaseHas('room_user', [
+                'room_id' => $room->id,
+                'user_id' => auth()->id(),
+            ]);
+        });
     });
 });
