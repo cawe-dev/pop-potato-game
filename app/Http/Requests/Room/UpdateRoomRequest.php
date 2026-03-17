@@ -36,6 +36,7 @@ final class UpdateRoomRequest extends FormRequest
             'type'      => [Rule::enum(RoomType::class)],
             'game_mode' => [Rule::enum(RoomGameMode::class)],
             'status'    => [Rule::enum(RoomStatus::class)],
+            'user_id'   => 'prohibited',
         ];
     }
 
