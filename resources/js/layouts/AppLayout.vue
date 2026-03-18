@@ -4,7 +4,9 @@
 <template>
     <UApp>
         <UMain>
-            <slot />
+            <div class="mt-5">
+                <slot />
+            </div>
         </UMain>
         <UFooter />
     </UApp>
