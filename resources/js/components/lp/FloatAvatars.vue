@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { FloatAvatar } from '@/types/floatAvatars';
 import { AVATAR_TYPE } from '@/constants/avatars';
+import type { FloatAvatar } from '@/types/floatAvatars';
 
 const columns = 4;
 const rows = 5;

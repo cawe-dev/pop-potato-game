@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
-import AppLayout from '@/layouts/AppLayout.vue';
 import { onMounted, onUnmounted, ref, watch } from 'vue';
 import Avatars from '@/components/lp/Avatars.vue';
-import { useTyping } from '@/composables/useTyping';
-import { THEMES } from '@/constants/themes';
-import { QUESTIONS } from '@/constants/questions';
 import FloatAvatars from '@/components/lp/FloatAvatars.vue';
+import { useTyping } from '@/composables/useTyping';
+import { QUESTIONS } from '@/constants/questions';
+import { THEMES } from '@/constants/themes';
+import AppLayout from '@/layouts/AppLayout.vue';
 
 const currentThemeIndex = ref(0);
 const { typedText: question, typeText } = useTyping();
