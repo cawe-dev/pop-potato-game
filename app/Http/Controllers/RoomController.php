@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Enums\Room\RoomTheme;
 use App\Enums\Room\RoomTransferOwner;
 use App\Filters\RoomFilter;
 use App\Http\Requests\JoinRoomRequest;
@@ -13,6 +14,7 @@ use App\Http\Requests\Room\KickRoomRequest;
 use App\Http\Requests\Room\StoreRoomRequest;
 use App\Http\Requests\Room\UpdateRoomRequest;
 use App\Services\Room\IRoomService;
+use Inertia\Inertia;
 
 final class RoomController extends Controller
 {
@@ -20,7 +22,14 @@ final class RoomController extends Controller
 
     public function index(IndexRoomRequest $request, RoomFilter $filter)
     {
-        return $this->service->indexPaginated($filter);
+        $rooms = $this->service->indexPaginated($filter);
+        $themes = collect(RoomTheme::cases())->map(fn($theme) => [
+            'value' => $theme->value,
+            'label' => $theme->label(),
+            'icon' => $theme->icon(),
+        ]);
+
+        return Inertia::render('rooms/Index', ['paginatedRooms' => $rooms, 'themes' => $themes]);
     }
 
     public function create()
