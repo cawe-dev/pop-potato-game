@@ -36,6 +36,8 @@ final class Room extends Model
         'password',
     ];
 
+    protected $withCount = ['users'];
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
