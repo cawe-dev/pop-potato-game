@@ -10,6 +10,7 @@ import { Spinner } from '@/components/ui/spinner';
 import AuthBase from '@/layouts/AuthLayout.vue';
 import { register } from '@/routes';
 import { store } from '@/routes/login';
+import { index as guestLogin } from '@/routes/guest-login';
 import { request } from '@/routes/password';
 
 defineProps<{
@@ -96,6 +97,17 @@ defineProps<{
                     <Spinner v-if="processing" />
                     Log in
                 </Button>
+
+                  <Button
+                    type="button"
+                    class="mt-4 w-full"
+                    :tabindex="4"
+                    data-test="guest-login-button"
+                >
+                    <a :href="guestLogin().url" >
+                    Enter as Guest
+                    </a>
+                </Button>                     
             </div>
 
             <div
