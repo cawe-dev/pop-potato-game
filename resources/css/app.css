@@ -16,12 +16,20 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: 'Press Start 2P';
+  src: url('../fonts/PressStart2P-Regular.ttf') format('truetype');
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme inline {
     --font-sans:
         Instrument Sans, ui-sans-serif, system-ui, sans-serif,
         'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
         'Noto Color Emoji';
-    --font-pixel: "Pixelify Sans", sans-serif;
+    --font-pixel: "Press Start 2P", sans-serif;
     
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);
@@ -191,6 +199,12 @@
 .surface-elevated-interactive:active {
   box-shadow: 1px 1px 0px #1A1A1A;
   transform: translate(2px, 2px);
+}
+
+.pixel-text {
+  font-family: var(--font-pixel), 'Press Start 2P', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 @layer base {
