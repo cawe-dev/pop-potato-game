@@ -102,6 +102,7 @@
 
     --background: var(--neutral-bg);
     --foreground: var(--neutral-text);
+    --brutal-edge: #1A1A1A;
     
     --card: var(--neutral-white);
     --card-foreground: var(--neutral-text);
@@ -180,24 +181,74 @@
 }
 
 .surface-elevated {
-  border: 3px solid #1A1A1A;
-  box-shadow: 4px 4px 0px #1A1A1A;
+  border: 3px solid var(--brutal-edge);
+  box-shadow: 4px 4px 0px var(--brutal-edge);
   transition: box-shadow 0.15s ease, transform 0.15s ease;
 }
 
 .surface-elevated-sm {
-  border: 2px solid #1A1A1A;
-  box-shadow: 3px 3px 0px #1A1A1A;
+  border: 2px solid var(--brutal-edge);
+  box-shadow: 3px 3px 0px var(--brutal-edge);
   transition: box-shadow 0.15s ease, transform 0.15s ease;
 }
 
 .surface-elevated-interactive:hover {
-  box-shadow: 6px 6px 0px #1A1A1A;
+  box-shadow: 6px 6px 0px var(--brutal-edge);
   transform: translate(-2px, -2px);
 }
 
 .surface-elevated-interactive:active {
-  box-shadow: 1px 1px 0px #1A1A1A;
+  box-shadow: 1px 1px 0px var(--brutal-edge);
+  transform: translate(2px, 2px);
+}
+
+.ticket-wrapper {
+    filter:
+        drop-shadow(3px 0px 0px var(--brutal-edge)) drop-shadow(-3px 0px 0px var(--brutal-edge)) drop-shadow(0px 3px 0px var(--brutal-edge)) drop-shadow(0px -3px 0px var(--brutal-edge)) drop-shadow(4px 4px 0px var(--brutal-edge));
+    transition: filter 0.15s ease, transform 0.15s ease;
+}
+
+.ticket-shape {
+    border-radius: var(--radius-lg, 0.75rem);
+
+    mask-image:
+        radial-gradient(circle 14px at 0% 50%, transparent 14px, black 14.5px),
+        radial-gradient(circle 14px at 100% 50%, transparent 14px, black 14.5px);
+
+    mask-size: 51% 100%;
+    mask-position: left, right;
+    mask-repeat: no-repeat;
+}
+
+.ticket-wrapper:hover {
+    filter:
+        drop-shadow(3px 0px 0px var(--brutal-edge)) drop-shadow(-3px 0px 0px var(--brutal-edge)) drop-shadow(0px 3px 0px var(--brutal-edge)) drop-shadow(0px -3px 0px var(--brutal-edge)) drop-shadow(6px 6px 0px var(--brutal-edge));
+    transform: translate(-2px, -2px);
+}
+
+.ticket-wrapper:active {
+    filter:
+        drop-shadow(3px 0px 0px var(--brutal-edge)) drop-shadow(-3px 0px 0px var(--brutal-edge)) drop-shadow(0px 3px 0px var(--brutal-edge)) drop-shadow(0px -3px 0px var(--brutal-edge)) drop-shadow(1px 1px 0px var(--brutal-edge));
+    transform: translate(2px, 2px);
+}
+
+.brutal-border {
+  border: 3px solid var(--brutal-edge);
+}
+
+.brutal-border-t { border-top: 3px solid var(--brutal-edge); }
+.brutal-border-b { border-bottom: 3px solid var(--brutal-edge); }
+.brutal-border-l { border-left: 3px solid var(--brutal-edge); }
+.brutal-border-r { border-right: 3px solid var(--brutal-edge); }
+
+.brutal-input {
+  @apply w-full bg-card text-card-foreground p-4 rounded-xl outline-none focus:ring-4 focus:ring-ring/50 font-bold transition-all placeholder:text-muted-foreground/50;
+  border: 3px solid var(--brutal-edge);
+  box-shadow: 4px 4px 0px var(--brutal-edge);
+}
+
+.brutal-input:active {
+  box-shadow: 1px 1px 0px var(--brutal-edge);
   transform: translate(2px, 2px);
 }
 
