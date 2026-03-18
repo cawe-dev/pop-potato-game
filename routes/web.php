@@ -20,6 +20,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/rooms/{code}/kick/{user}', [RoomController::class, 'kick'])->name('rooms.kick');
 });
 
-Route::post('/guest-login', GuestSessionController::class)->name('guest-login');
+Route::get('/guest-login', [GuestSessionController::class, 'index'])->name('guest-login.index');
+Route::post('/guest-login', [GuestSessionController::class, 'store'])->name('guest-login.store');
 
 require __DIR__ . '/settings.php';
