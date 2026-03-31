@@ -76,8 +76,50 @@ defmodule PopPotatoGame.Accounts do
   """
   def register_user(attrs) do
     %User{}
-    |> User.email_changeset(attrs)
+    |> User.registration_changeset(attrs)
     |> Repo.insert()
+  end
+
+  def register_guest_user(nickname) when is_binary(nickname) do
+    free_up_ghost_guest(nickname)
+
+    uuid = Ecto.UUID.generate()
+    temp_email = "guest-#{uuid}@poppotato.game"
+
+    attrs = %{
+      "email" => temp_email,
+      "nickname" => nickname
+    }
+
+    %User{}
+    |> User.guest_registration_changeset(attrs)
+    |> Repo.insert()
+  end
+
+  defp free_up_ghost_guest(nickname) do
+    user = Repo.get_by(User, nickname: nickname)
+
+    if user && user.is_guest do
+      last_token =
+        Repo.one(
+          from t in UserToken,
+            where: t.user_id == ^user.id and t.context == "session",
+            order_by: [desc: t.inserted_at],
+            limit: 1
+        )
+
+      timeout_limit = DateTime.add(DateTime.utc_now(), -1, :hour)
+
+      is_ghost =
+        case last_token do
+          nil -> true
+          token -> DateTime.before?(token.inserted_at, timeout_limit)
+        end
+
+      if is_ghost do
+        Repo.delete(user)
+      end
+    end
   end
 
   ## Settings
@@ -279,6 +321,10 @@ defmodule PopPotatoGame.Accounts do
   def delete_user_session_token(token) do
     Repo.delete_all(from(UserToken, where: [token: ^token, context: "session"]))
     :ok
+  end
+
+  def delete_user(%User{} = user) do
+    Repo.delete(user)
   end
 
   ## Token helper

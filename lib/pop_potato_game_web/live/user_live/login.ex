@@ -35,6 +35,33 @@ defmodule PopPotatoGameWeb.UserLive.Login do
           </div>
         </div>
 
+        <div class="mt-8">
+          <h3 class="text-lg font-medium text-center">Play without an account</h3>
+
+          <.form
+            for={%{}}
+            as={:guest_user}
+            id="guest_login_form"
+            action={~p"/users/log-in"}
+            phx-submit="submit_guest"
+            phx-trigger-action={@trigger_guest_submit}
+            class="space-y-4"
+          >
+            <.input
+              field={to_form(%{}, as: :guest_user)[:nickname]}
+              type="text"
+              label="Nickname"
+              required
+            />
+
+            <.button type="submit" class="w-full btn btn-secondary">
+              Guest Log in
+            </.button>
+          </.form>
+        </div>
+
+        <div class="divider">or</div>
+
         <.form
           :let={f}
           for={@form}
@@ -103,12 +130,16 @@ defmodule PopPotatoGameWeb.UserLive.Login do
 
     form = to_form(%{"email" => email}, as: "user")
 
-    {:ok, assign(socket, form: form, trigger_submit: false)}
+    {:ok, assign(socket, form: form, trigger_submit: false, trigger_guest_submit: false)}
   end
 
   @impl true
   def handle_event("submit_password", _params, socket) do
     {:noreply, assign(socket, :trigger_submit, true)}
+  end
+
+  def handle_event("submit_guest", _params, socket) do
+    {:noreply, assign(socket, :trigger_guest_submit, true)}
   end
 
   def handle_event("submit_magic", %{"user" => %{"email" => email}}, socket) do

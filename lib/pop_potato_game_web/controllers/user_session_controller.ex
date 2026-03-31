@@ -12,6 +12,20 @@ defmodule PopPotatoGameWeb.UserSessionController do
     create(conn, params, "Welcome back!")
   end
 
+  defp create(conn, %{"guest_user" => %{"nickname" => nickname}}, info) do
+    case Accounts.register_guest_user(nickname) do
+      {:ok, user} ->
+        conn
+        |> put_flash(:info, "Welcome, #{user.nickname}! #{info}")
+        |> UserAuth.log_in_user(user, %{})
+
+      {:error, _changeset} ->
+        conn
+        |> put_flash(:error, "That nickname is not available. It might be taken")
+        |> redirect(to: ~p"/users/log-in")
+    end
+  end
+
   # magic link login
   defp create(conn, %{"user" => %{"token" => token} = user_params}, info) do
     case Accounts.login_user_by_magic_link(token) do
@@ -60,8 +74,17 @@ defmodule PopPotatoGameWeb.UserSessionController do
   end
 
   def delete(conn, _params) do
+    user = conn.assigns.current_scope.user
+
+    conn =
+      conn
+      |> put_flash(:info, "Logged out successfully.")
+      |> UserAuth.log_out_user()
+
+    if user && user.is_guest do
+      Accounts.delete_user(user)
+    end
+
     conn
-    |> put_flash(:info, "Logged out successfully.")
-    |> UserAuth.log_out_user()
   end
 end

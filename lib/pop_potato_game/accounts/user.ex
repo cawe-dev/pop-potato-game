@@ -8,8 +8,23 @@ defmodule PopPotatoGame.Accounts.User do
     field :hashed_password, :string, redact: true
     field :confirmed_at, :utc_datetime
     field :authenticated_at, :utc_datetime, virtual: true
+    field :nickname, :string
+    field :is_guest, :boolean, default: false
 
     timestamps(type: :utc_datetime)
+  end
+
+  def registration_changeset(user, attrs, opts \\ []) do
+    user
+    |> cast(attrs, [:email, :nickname])
+    |> validate_email(opts)
+    |> validate_nickname(opts)
+  end
+
+  def guest_registration_changeset(user, attrs, opts \\ []) do
+    user
+    |> registration_changeset(attrs, opts)
+    |> put_change(:is_guest, true)
   end
 
   @doc """
@@ -27,6 +42,28 @@ defmodule PopPotatoGame.Accounts.User do
     user
     |> cast(attrs, [:email])
     |> validate_email(opts)
+  end
+
+  def nickname_changeset(user, attrs, opts \\ []) do
+    user
+    |> cast(attrs, [:nickname])
+    |> validate_nickname(opts)
+  end
+
+  defp validate_nickname(changeset, opts) do
+    changeset =
+      changeset
+      |> validate_required([:nickname])
+      |> unsafe_validate_unique(:nickname, PopPotatoGame.Repo)
+      |> unique_constraint(:nickname)
+
+    if Keyword.get(opts, :validate_unique, true) do
+      changeset
+      |> unsafe_validate_unique(:nickname, PopPotatoGame.Repo)
+      |> unique_constraint(:nickname)
+    else
+      changeset
+    end
   end
 
   defp validate_email(changeset, opts) do

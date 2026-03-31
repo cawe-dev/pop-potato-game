@@ -33,6 +33,16 @@ defmodule PopPotatoGameWeb.UserLive.Registration do
             phx-mounted={JS.focus()}
           />
 
+          <.input
+            field={@form[:nickname]}
+            type="text"
+            label="Nickname"
+            autocomplete="username"
+            spellcheck="false"
+            required
+            phx-mounted={JS.focus()}
+          />
+
           <.button phx-disable-with="Creating account..." class="btn btn-primary w-full">
             Create an account
           </.button>
