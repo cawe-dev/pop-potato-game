@@ -7,6 +7,19 @@
 # General application configuration
 import Config
 
+config :pop_potato_game, :scopes,
+  user: [
+    default: true,
+    module: PopPotatoGame.Accounts.Scope,
+    assign_key: :current_scope,
+    access_path: [:user, :id],
+    schema_key: :user_id,
+    schema_type: :id,
+    schema_table: :users,
+    test_data_fixture: PopPotatoGame.AccountsFixtures,
+    test_setup_helper: :register_and_log_in_user
+  ]
+
 config :pop_potato_game,
   ecto_repos: [PopPotatoGame.Repo],
   generators: [timestamp_type: :utc_datetime]
