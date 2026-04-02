@@ -23,6 +23,15 @@ defmodule PopPotatoGameWeb.Router do
     get "/", PageController, :home
   end
 
+  scope "/", PopPotatoGameWeb do
+    pipe_through [:browser, :require_authenticated_user]
+
+   live "/rooms", RoomLive.Index, :index
+    live "/rooms/new", RoomLive.Form, :new
+    live "/rooms/:id", RoomLive.Show, :show
+    live "/rooms/:id/edit", RoomLive.Form, :edit
+  end
+
   # Other scopes may use custom stacks.
   # scope "/api", PopPotatoGameWeb do
   #   pipe_through :api
