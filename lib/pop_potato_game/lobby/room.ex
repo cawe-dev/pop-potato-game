@@ -35,6 +35,7 @@ defmodule PopPotatoGame.Lobby.Room do
       :status,
       :user_id
     ])
+    |> validate_number(:max_users, greater_than_or_equal_to: 2, message: "must be at least 2")
     |> handle_password_by_type()
   end
 
