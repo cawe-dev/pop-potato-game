@@ -27,6 +27,19 @@ defmodule PopPotatoGameWeb.RoomLive.Show do
         </:actions>
       </.header>
 
+      <.table id="users" rows={@room.users}>
+        <:col :let={user} label="nickname">{user.nickname}</:col>
+        <:col :let={user} label="transfer_owner">
+          <.button
+            :if={@current_scope.user.id == @room.user_id}
+            phx-click="transfer_owner"
+            phx-value-new_owner_id={user.id}
+          >
+            Trasfer Owner
+          </.button>
+        </:col>
+      </.table>
+
       <.list>
         <:item title="Code">{@room.code}</:item>
         <:item title="Icon">{@room.icon}</:item>
@@ -91,6 +104,26 @@ defmodule PopPotatoGameWeb.RoomLive.Show do
         {:noreply,
          socket
          |> put_flash(:error, "Its necessary least 2 player to start the match")}
+    end
+  end
+
+  def handle_event("transfer_owner", params, socket) do
+    %{"new_owner_id" => new_owner_id} = params
+
+    case Lobby.transfer_ownership(
+           socket.assigns.current_scope,
+           socket.assigns.room,
+           String.to_integer(new_owner_id)
+         ) do
+      {:ok, _room} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "#{new_owner_id} is new owner")}
+
+      {:error, :user_not_found} ->
+        {:noreply,
+         socket
+         |> put_flash(:error, "Target user from a new owner is not found")}
     end
   end
 end
