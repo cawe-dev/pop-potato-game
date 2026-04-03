@@ -205,4 +205,45 @@ defmodule PopPotatoGame.Lobby do
 
     Room.changeset(room, attrs, scope)
   end
+
+  def join_room(%Scope{} = scope, %Room{} = room, provided_password \\ nil) do
+    if room.type == :private && room.password != provided_password do
+      {:error, :invalid_password}
+    else
+      users_count = Repo.aggregate(from(ru in RoomUser, where: ru.room_id == ^room.id), :count)
+
+      if users_count >= room.max_users do
+        {:error, :room_full}
+      else
+        attrs = %{
+          room_id: room.id,
+          user_id: scope.user.id
+        }
+
+        Repo.insert(RoomUser.changeset(%RoomUser{}, attrs))
+      end
+    end
+  end
+
+  def leave_room(%Scope{} = scope, %Room{} = room) do
+    room_user = Repo.get_by(RoomUser, room_id: room.id, user_id: scope.user.id)
+    if room_user, do: Repo.delete(room_user)
+
+    remaining_users = Repo.all(from ru in RoomUser, where: ru.room_id == ^room.id)
+
+    cond do
+      Enum.empty?(remaining_users) ->
+        Repo.delete(room)
+
+      room.user_id == scope.user.id ->
+        new_owner = List.first(remaining_users)
+
+        room
+        |> Ecto.Changeset.change(user_id: new_owner.user_id)
+        |> Repo.update()
+
+      true ->
+        {:ok, :left}
+    end
+  end
 end
