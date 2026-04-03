@@ -38,6 +38,15 @@ defmodule PopPotatoGameWeb.RoomLive.Show do
             Trasfer Owner
           </.button>
         </:col>
+        <:col :let={user} label="kick_user">
+          <.button
+            :if={@current_scope.user.id == @room.user_id}
+            phx-click="kick_user"
+            phx-value-target_user_id={user.id}
+          >
+            Kick
+          </.button>
+        </:col>
       </.table>
 
       <.list>
@@ -124,6 +133,26 @@ defmodule PopPotatoGameWeb.RoomLive.Show do
         {:noreply,
          socket
          |> put_flash(:error, "Target user from a new owner is not found")}
+    end
+  end
+
+  def handle_event("kick_user", params, socket) do
+    %{"target_user_id" => target_user_id} = params
+
+    case Lobby.kick_user(
+           socket.assigns.current_scope,
+           socket.assigns.room,
+           String.to_integer(target_user_id)
+         ) do
+      {:ok, _room} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "#{target_user_id} is kicked")}
+
+      {:error, :user_not_found} ->
+        {:noreply,
+         socket
+         |> put_flash(:error, "Target user is not found")}
     end
   end
 end
