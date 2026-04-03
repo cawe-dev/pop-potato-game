@@ -10,6 +10,21 @@ defmodule PopPotatoGame.Lobby do
   alias PopPotatoGame.Lobby.RoomUser
   alias PopPotatoGame.Accounts.Scope
 
+  def list_rooms(filters \\ %{})
+
+  @doc """
+  Returns the list of rooms by scope.
+
+  ## Examples
+
+      iex> list_rooms(scope)
+      [%Room{}, ...]
+
+  """
+  def list_rooms(%Scope{} = scope) do
+    Repo.all_by(Room, user_id: scope.user.id)
+  end
+
   @doc """
   Returns the list of rooms.
 
@@ -19,8 +34,59 @@ defmodule PopPotatoGame.Lobby do
       [%Room{}, ...]
 
   """
-  def list_rooms do
-    Repo.all(Room)
+  def list_rooms(filters) when is_map(filters) do
+    Room
+    |> base_rooms_query()
+    |> apply_room_filters(filters)
+    |> Repo.all()
+  end
+
+  defp base_rooms_query(query) do
+    from r in query, where: r.status != :finished
+  end
+
+  defp apply_room_filters(query, filters) do
+    Enum.reduce(filters, query, fn {key, value}, current_query ->
+      filter_room(current_query, key, value)
+    end)
+  end
+
+  defp filter_room(query, "type", type) when is_binary(type) do
+    from r in query, where: r.type == ^type
+  end
+
+  defp filter_room(query, "code", code) when is_binary(code) do
+    from r in query, where: r.code == ^code
+  end
+
+  defp filter_room(query, "theme", theme) when is_list(theme) do
+    from r in query, where: r.theme in ^theme
+  end
+
+  defp filter_room(query, "game_mode", game_mode) when is_list(game_mode) do
+    from r in query, where: r.game_mode in ^game_mode
+  end
+
+  defp filter_room(query, _unknown_key, _value), do: query
+
+  @doc """
+  Gets a single room.
+
+  Raises `Ecto.NoResultsError` if the Room does not exist.
+
+  ## Examples
+
+      iex> get_room!(scope, 123)
+      %Room{}
+
+      iex> get_room!(scope, 456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_room!(%Scope{} = scope, id) do
+    Room
+    |> Repo.get_by!(id: id, user_id: scope.user.id)
+    |> Repo.preload([:user, :users])
   end
 
   @doc """
@@ -37,7 +103,11 @@ defmodule PopPotatoGame.Lobby do
       ** (Ecto.NoResultsError)
 
   """
-  def get_room!(id), do: Repo.get!(Room, id)
+  def get_room!(id) do
+    Room
+    |> Repo.get!(id)
+    |> Repo.preload([:user, :users])
+  end
 
   @doc """
   Subscribes to scoped notifications about any room changes.
@@ -59,37 +129,6 @@ defmodule PopPotatoGame.Lobby do
     key = scope.user.id
 
     Phoenix.PubSub.broadcast(PopPotatoGame.PubSub, "user:#{key}:rooms", message)
-  end
-
-  @doc """
-  Returns the list of rooms.
-
-  ## Examples
-
-      iex> list_rooms(scope)
-      [%Room{}, ...]
-
-  """
-  def list_rooms(%Scope{} = scope) do
-    Repo.all_by(Room, user_id: scope.user.id)
-  end
-
-  @doc """
-  Gets a single room.
-
-  Raises `Ecto.NoResultsError` if the Room does not exist.
-
-  ## Examples
-
-      iex> get_room!(scope, 123)
-      %Room{}
-
-      iex> get_room!(scope, 456)
-      ** (Ecto.NoResultsError)
-
-  """
-  def get_room!(%Scope{} = scope, id) do
-    Repo.get_by!(Room, id: id, user_id: scope.user.id)
   end
 
   @doc """
