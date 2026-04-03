@@ -285,4 +285,49 @@ defmodule PopPotatoGame.Lobby do
         {:ok, :left}
     end
   end
+
+  def kick_user(%Scope{} = scope, %Room{} = room, target_user_id) do
+    true = room.user_id == scope.user.id
+
+    attrs = %{room_id: room.id, user_id: target_user_id}
+
+    case Repo.get_by(RoomUser, attrs) do
+      %RoomUser{} = room_user ->
+        room_user
+        |> Repo.delete()
+
+      nil ->
+        {:error, :user_not_found}
+    end
+  end
+
+  def transfer_ownership(%Scope{} = scope, %Room{} = room, new_owner_id) do
+    true = room.user_id == scope.user.id
+
+    attrs = %{room_id: room.id, user_id: new_owner_id}
+
+    case Repo.get_by(RoomUser, attrs) do
+      %RoomUser{} = _room_user ->
+        room
+        |> Ecto.Changeset.change(user_id: new_owner_id)
+        |> Repo.update()
+
+      nil ->
+        {:error, :user_not_found}
+    end
+  end
+
+  def start_match(%Scope{} = scope, %Room{} = room) do
+    true = room.user_id === scope.user.id
+
+    users_count = Repo.aggregate(from(ru in RoomUser, where: ru.room_id == ^room.id), :count)
+
+    if users_count < 2 do
+      {:error, :only_owner_present}
+    else
+      room
+      |> Ecto.Changeset.change(status: :playing)
+      |> Repo.update()
+    end
+  end
 end
