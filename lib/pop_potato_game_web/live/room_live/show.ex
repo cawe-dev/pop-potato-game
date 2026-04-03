@@ -72,15 +72,15 @@ defmodule PopPotatoGameWeb.RoomLive.Show do
     {:ok,
      socket
      |> assign(:page_title, "Show Room")
-     |> assign(:room, Lobby.get_room!(socket.assigns.current_scope, id))}
+     |> assign(:room, Lobby.get_room!(id))}
   end
 
   @impl true
   def handle_info(
-        {:updated, %PopPotatoGame.Lobby.Room{id: id} = room},
+        {:updated, %PopPotatoGame.Lobby.Room{id: id} = _room},
         %{assigns: %{room: %{id: id}}} = socket
       ) do
-    {:noreply, assign(socket, :room, room)}
+    {:noreply, assign(socket, :room, Lobby.get_room!(socket.assigns.room.id))}
   end
 
   def handle_info(
@@ -102,8 +102,9 @@ defmodule PopPotatoGameWeb.RoomLive.Show do
   def handle_event("start_match", _params, socket) do
     case Lobby.start_match(socket.assigns.current_scope, socket.assigns.room) do
       {:ok, _room} ->
-        socket
-        |> assign(:room, Lobby.get_room!(socket.assigns.current_scope, socket.assigns.room.id))
+        socket =
+          socket
+          |> assign(:room, Lobby.get_room!(socket.assigns.room.id))
 
         {:noreply,
          socket
@@ -127,6 +128,7 @@ defmodule PopPotatoGameWeb.RoomLive.Show do
       {:ok, _room} ->
         {:noreply,
          socket
+         |> assign(:room, Lobby.get_room!(socket.assigns.room.id))
          |> put_flash(:info, "#{new_owner_id} is new owner")}
 
       {:error, :user_not_found} ->
@@ -144,9 +146,10 @@ defmodule PopPotatoGameWeb.RoomLive.Show do
            socket.assigns.room,
            String.to_integer(target_user_id)
          ) do
-      {:ok, _room} ->
+      {:ok, _room_user} ->
         {:noreply,
          socket
+         |> assign(:room, Lobby.get_room!(socket.assigns.room.id))
          |> put_flash(:info, "#{target_user_id} is kicked")}
 
       {:error, :user_not_found} ->
