@@ -17,6 +17,13 @@ defmodule PopPotatoGameWeb.RoomLive.Show do
           <.button variant="primary" navigate={~p"/rooms/#{@room}/edit?return_to=show"}>
             <.icon name="hero-pencil-square" /> Edit room
           </.button>
+          <.button
+            :if={@current_scope.user.id == @room.user_id}
+            variant="accent"
+            phx-click="start_match"
+          >
+            <.icon name="hero-play" /> Start Game
+          </.button>
         </:actions>
       </.header>
 
@@ -67,5 +74,23 @@ defmodule PopPotatoGameWeb.RoomLive.Show do
   def handle_info({type, %PopPotatoGame.Lobby.Room{}}, socket)
       when type in [:created, :updated, :deleted] do
     {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("start_match", _params, socket) do
+    case Lobby.start_match(socket.assigns.current_scope, socket.assigns.room) do
+      {:ok, _room} ->
+        socket
+        |> assign(:room, Lobby.get_room!(socket.assigns.current_scope, socket.assigns.room.id))
+
+        {:noreply,
+         socket
+         |> put_flash(:info, "Starting match")}
+
+      {:error, :only_owner_present} ->
+        {:noreply,
+         socket
+         |> put_flash(:error, "Its necessary least 2 player to start the match")}
+    end
   end
 end
