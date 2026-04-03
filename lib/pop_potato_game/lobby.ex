@@ -152,12 +152,16 @@ defmodule PopPotatoGame.Lobby do
   def update_room(%Scope{} = scope, %Room{} = room, attrs) do
     true = room.user_id == scope.user.id
 
-    with {:ok, room = %Room{}} <-
-           room
-           |> Room.changeset(attrs, scope)
-           |> Repo.update() do
-      broadcast_room(scope, {:updated, room})
-      {:ok, room}
+    if room.status != "waiting" do
+      {:error, :room_already_started}
+    else
+      with {:ok, room = %Room{}} <-
+             room
+             |> Room.changeset(attrs)
+             |> Repo.update() do
+        broadcast_room(scope, {:updated, room})
+        {:ok, room}
+      end
     end
   end
 
