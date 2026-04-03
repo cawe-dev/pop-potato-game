@@ -13,6 +13,8 @@ defmodule PopPotatoGame.Lobby.Room do
     field :status, :string, default: "waiting"
 
     belongs_to :user, PopPotatoGame.Accounts.User
+    has_many :room_users, PopPotatoGame.Lobby.RoomUser
+    many_to_many :users, PopPotatoGame.Accounts.User, join_through: PopPotatoGame.Lobby.RoomUser
 
     timestamps(type: :utc_datetime)
   end
