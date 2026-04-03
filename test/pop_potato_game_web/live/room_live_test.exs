@@ -7,8 +7,11 @@ defmodule PopPotatoGameWeb.RoomLiveTest do
   @create_attrs %{code: "some code", status: "some status", type: "some type", password: "some password", icon: "some icon", theme: "some theme", max_users: 42, game_mode: "some game_mode"}
   @update_attrs %{code: "some updated code", status: "some updated status", type: "some updated type", password: "some updated password", icon: "some updated icon", theme: "some updated theme", max_users: 43, game_mode: "some updated game_mode"}
   @invalid_attrs %{code: nil, status: nil, type: nil, password: nil, icon: nil, theme: nil, max_users: nil, game_mode: nil}
-  defp create_room(_) do
-    room = room_fixture()
+
+  setup :register_and_log_in_user
+
+  defp create_room(%{scope: scope}) do
+    room = room_fixture(scope)
 
     %{room: room}
   end

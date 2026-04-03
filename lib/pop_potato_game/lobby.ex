@@ -37,22 +37,82 @@ defmodule PopPotatoGame.Lobby do
   """
   def get_room!(id), do: Repo.get!(Room, id)
 
+  alias PopPotatoGame.Lobby.Room
+  alias PopPotatoGame.Accounts.Scope
+
+  @doc """
+  Subscribes to scoped notifications about any room changes.
+
+  The broadcasted messages match the pattern:
+
+    * {:created, %Room{}}
+    * {:updated, %Room{}}
+    * {:deleted, %Room{}}
+
+  """
+  def subscribe_rooms(%Scope{} = scope) do
+    key = scope.user.id
+
+    Phoenix.PubSub.subscribe(PopPotatoGame.PubSub, "user:#{key}:rooms")
+  end
+
+  defp broadcast_room(%Scope{} = scope, message) do
+    key = scope.user.id
+
+    Phoenix.PubSub.broadcast(PopPotatoGame.PubSub, "user:#{key}:rooms", message)
+  end
+
+  @doc """
+  Returns the list of rooms.
+
+  ## Examples
+
+      iex> list_rooms(scope)
+      [%Room{}, ...]
+
+  """
+  def list_rooms(%Scope{} = scope) do
+    Repo.all_by(Room, user_id: scope.user.id)
+  end
+
+  @doc """
+  Gets a single room.
+
+  Raises `Ecto.NoResultsError` if the Room does not exist.
+
+  ## Examples
+
+      iex> get_room!(scope, 123)
+      %Room{}
+
+      iex> get_room!(scope, 456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_room!(%Scope{} = scope, id) do
+    Repo.get_by!(Room, id: id, user_id: scope.user.id)
+  end
+
   @doc """
   Creates a room.
 
   ## Examples
 
-      iex> create_room(%{field: value})
+      iex> create_room(scope, %{field: value})
       {:ok, %Room{}}
 
-      iex> create_room(%{field: bad_value})
+      iex> create_room(scope, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_room(attrs) do
-    %Room{}
-    |> Room.changeset(attrs)
-    |> Repo.insert()
+  def create_room(%Scope{} = scope, attrs) do
+    with {:ok, room = %Room{}} <-
+           %Room{}
+           |> Room.save_changeset(attrs, scope)
+           |> Repo.insert() do
+      broadcast_room(scope, {:created, room})
+      {:ok, room}
+    end
   end
 
   @doc """
@@ -60,17 +120,23 @@ defmodule PopPotatoGame.Lobby do
 
   ## Examples
 
-      iex> update_room(room, %{field: new_value})
+      iex> update_room(scope, room, %{field: new_value})
       {:ok, %Room{}}
 
-      iex> update_room(room, %{field: bad_value})
+      iex> update_room(scope, room, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_room(%Room{} = room, attrs) do
-    room
-    |> Room.changeset(attrs)
-    |> Repo.update()
+  def update_room(%Scope{} = scope, %Room{} = room, attrs) do
+    true = room.user_id == scope.user.id
+
+    with {:ok, room = %Room{}} <-
+           room
+           |> Room.changeset(attrs, scope)
+           |> Repo.update() do
+      broadcast_room(scope, {:updated, room})
+      {:ok, room}
+    end
   end
 
   @doc """
@@ -78,15 +144,21 @@ defmodule PopPotatoGame.Lobby do
 
   ## Examples
 
-      iex> delete_room(room)
+      iex> delete_room(scope, room)
       {:ok, %Room{}}
 
-      iex> delete_room(room)
+      iex> delete_room(scope, room)
       {:error, %Ecto.Changeset{}}
 
   """
-  def delete_room(%Room{} = room) do
-    Repo.delete(room)
+  def delete_room(%Scope{} = scope, %Room{} = room) do
+    true = room.user_id == scope.user.id
+
+    with {:ok, room = %Room{}} <-
+           Repo.delete(room) do
+      broadcast_room(scope, {:deleted, room})
+      {:ok, room}
+    end
   end
 
   @doc """
@@ -94,11 +166,17 @@ defmodule PopPotatoGame.Lobby do
 
   ## Examples
 
-      iex> change_room(room)
+      iex> change_room(scope, room)
       %Ecto.Changeset{data: %Room{}}
 
   """
-  def change_room(%Room{} = room, attrs \\ %{}) do
-    Room.changeset(room, attrs)
+  def change_room(%Scope{} = scope, %Room{} = room) do
+    change_room(scope, room, %{})
+  end
+
+  def change_room(%Scope{} = scope, %Room{} = room, attrs) do
+    true = room.user_id == scope.user.id
+
+    Room.changeset(room, attrs, scope)
   end
 end

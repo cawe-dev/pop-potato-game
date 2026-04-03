@@ -6,7 +6,7 @@ defmodule PopPotatoGameWeb.RoomLive.Index do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash}>
+    <Layouts.app flash={@flash} current_scope={@current_scope}>
       <.header>
         Listing Rooms
         <:actions>
@@ -50,21 +50,31 @@ defmodule PopPotatoGameWeb.RoomLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
+    if connected?(socket) do
+      Lobby.subscribe_rooms(socket.assigns.current_scope)
+    end
+
     {:ok,
      socket
      |> assign(:page_title, "Listing Rooms")
-     |> stream(:rooms, list_rooms())}
+     |> stream(:rooms, list_rooms(socket.assigns.current_scope))}
   end
 
   @impl true
   def handle_event("delete", %{"id" => id}, socket) do
-    room = Lobby.get_room!(id)
-    {:ok, _} = Lobby.delete_room(room)
+    room = Lobby.get_room!(socket.assigns.current_scope, id)
+    {:ok, _} = Lobby.delete_room(socket.assigns.current_scope, room)
 
     {:noreply, stream_delete(socket, :rooms, room)}
   end
 
-  defp list_rooms() do
-    Lobby.list_rooms()
+  @impl true
+  def handle_info({type, %PopPotatoGame.Lobby.Room{}}, socket)
+      when type in [:created, :updated, :deleted] do
+    {:noreply, stream(socket, :rooms, list_rooms(socket.assigns.current_scope), reset: true)}
+  end
+
+  defp list_rooms(current_scope) do
+    Lobby.list_rooms(current_scope)
   end
 end

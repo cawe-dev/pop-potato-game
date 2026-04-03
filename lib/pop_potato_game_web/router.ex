@@ -26,10 +26,16 @@ defmodule PopPotatoGameWeb.Router do
   scope "/", PopPotatoGameWeb do
     pipe_through [:browser, :require_authenticated_user]
 
-   live "/rooms", RoomLive.Index, :index
-    live "/rooms/new", RoomLive.Form, :new
-    live "/rooms/:id", RoomLive.Show, :show
-    live "/rooms/:id/edit", RoomLive.Form, :edit
+    live_session :rooms_session,
+      on_mount: [
+        {PopPotatoGameWeb.UserAuth, :require_authenticated},
+        {PopPotatoGameWeb.UserAuth, :mount_current_scope}
+      ] do
+      live "/rooms", RoomLive.Index, :index
+      live "/rooms/new", RoomLive.Form, :new
+      live "/rooms/:id", RoomLive.Show, :show
+      live "/rooms/:id/edit", RoomLive.Form, :edit
+    end
   end
 
   # Other scopes may use custom stacks.

@@ -24,4 +24,24 @@ defmodule PopPotatoGame.LobbyFixtures do
 
     room
   end
+
+  @doc """
+  Generate a room.
+  """
+  def scoped_room_fixture(scope, attrs \\ %{}) do
+    attrs =
+      Enum.into(attrs, %{
+        code: "some code",
+        game_mode: "some game_mode",
+        icon: "some icon",
+        max_users: 42,
+        password: "some password",
+        status: "some status",
+        theme: "some theme",
+        type: "some type"
+      })
+
+    {:ok, room} = PopPotatoGame.Lobby.create_room(scope, attrs)
+    room
+  end
 end
