@@ -10,7 +10,7 @@ defmodule PopPotatoGame.Lobby.Room do
     field :type, Ecto.Enum, values: [:public, :private], default: :public
     field :max_users, :integer
     field :game_mode, :string
-    field :status, :string, default: "waiting"
+    field :status, Ecto.Enum, values: [:waiting, :playing, :finished], default: :waiting
 
     belongs_to :user, PopPotatoGame.Accounts.User
     has_many :room_users, PopPotatoGame.Lobby.RoomUser

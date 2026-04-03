@@ -152,7 +152,7 @@ defmodule PopPotatoGame.Lobby do
   def update_room(%Scope{} = scope, %Room{} = room, attrs) do
     true = room.user_id == scope.user.id
 
-    if room.status != "waiting" do
+    if room.status != :waiting do
       {:error, :room_already_started}
     else
       with {:ok, room = %Room{}} <-
