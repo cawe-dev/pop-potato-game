@@ -4,9 +4,11 @@ defmodule PopPotatoGame.Lobby do
   """
 
   import Ecto.Query, warn: false
+  alias Ecto.Multi
   alias PopPotatoGame.Repo
-
   alias PopPotatoGame.Lobby.Room
+  alias PopPotatoGame.Lobby.RoomUser
+  alias PopPotatoGame.Accounts.Scope
 
   @doc """
   Returns the list of rooms.
@@ -36,9 +38,6 @@ defmodule PopPotatoGame.Lobby do
 
   """
   def get_room!(id), do: Repo.get!(Room, id)
-
-  alias PopPotatoGame.Lobby.Room
-  alias PopPotatoGame.Accounts.Scope
 
   @doc """
   Subscribes to scoped notifications about any room changes.
@@ -106,12 +105,35 @@ defmodule PopPotatoGame.Lobby do
 
   """
   def create_room(%Scope{} = scope, attrs) do
-    with {:ok, room = %Room{}} <-
-           %Room{}
-           |> Room.save_changeset(attrs, scope)
-           |> Repo.insert() do
-      broadcast_room(scope, {:created, room})
-      {:ok, room}
+    room_changeset = Room.save_changeset(%Room{}, attrs, scope)
+
+    Multi.new()
+    |> Multi.insert(:room, room_changeset)
+    |> Multi.run(:check_room, fn
+      _repo, %{room: room} -> {:ok, room}
+      _repo, %{room: {:error, _}} -> {:error, {:falied_create_room, :falied_create_room}}
+    end)
+    |> Multi.insert(:room_user, fn %{room: room} ->
+      RoomUser.changeset(%RoomUser{}, %{
+        room_id: room.id,
+        user_id: scope.user.id
+      })
+    end)
+    |> Multi.run(:check_join_user, fn
+      _repo, %{room_user: room_user} ->
+        {:ok, room_user}
+
+      _repo, %{room_user: {:error, _}} ->
+        {:error, {:falied_create_room, :falied_joined_user_to_room}}
+    end)
+    |> Repo.transact()
+    |> case do
+      {:ok, result} ->
+        broadcast_room(scope, {:created, result.room})
+        {:ok, result.room}
+
+      {:error, step, reason, _changes} ->
+        {:error, "Error in step #{step}", detail: reason}
     end
   end
 
