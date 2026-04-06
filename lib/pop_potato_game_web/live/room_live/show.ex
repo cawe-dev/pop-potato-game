@@ -1,64 +1,40 @@
 defmodule PopPotatoGameWeb.RoomLive.Show do
   use PopPotatoGameWeb, :live_view
+  import PopPotatoGameWeb.LobbyComponents
 
   alias PopPotatoGame.Lobby
 
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} current_scope={@current_scope}>
-      <.header>
-        Room {@room.id}
-        <:subtitle>This is a room record from your database.</:subtitle>
-        <:actions>
-          <.button navigate={~p"/rooms"}>
-            <.icon name="hero-arrow-left" />
-          </.button>
-          <.button variant="primary" navigate={~p"/rooms/#{@room}/edit?return_to=show"}>
-            <.icon name="hero-pencil-square" /> Edit room
-          </.button>
-          <.button
-            :if={@current_scope.user.id == @room.user_id}
-            variant="accent"
-            phx-click="start_match"
-          >
-            <.icon name="hero-play" /> Start Game
-          </.button>
-        </:actions>
-      </.header>
+    <Layouts.app flash={@flash} current_scope={@current_scope} page_title={@page_title}>
+      <.room_header
+        room={@room}
+        back_path={~p"/rooms"}
+        edit_path={
+          if @current_scope.user.id == @room.user_id,
+            do: ~p"/rooms/#{@room}/edit?return_to=show",
+            else: nil
+        }
+      />
 
-      <.table id="users" rows={@room.users}>
-        <:col :let={user} label="nickname">{user.nickname}</:col>
-        <:col :let={user} label="transfer_owner">
-          <.button
-            :if={@current_scope.user.id == @room.user_id}
-            phx-click="transfer_owner"
-            phx-value-new_owner_id={user.id}
-          >
-            Trasfer Owner
-          </.button>
-        </:col>
-        <:col :let={user} label="kick_user">
-          <.button
-            :if={@current_scope.user.id == @room.user_id}
-            phx-click="kick_user"
-            phx-value-target_user_id={user.id}
-          >
-            Kick
-          </.button>
-        </:col>
-      </.table>
+      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6 pb-32">
+        <.user_card
+          :for={{user, index} <- Enum.with_index(@room.users)}
+          user={user}
+          slot_index={index}
+          is_card_owner={user.id == @room.user_id}
+          current_user_is_host={@current_scope.user.id == @room.user_id}
+        />
 
-      <.list>
-        <:item title="Code">{@room.code}</:item>
-        <:item title="Icon">{@room.icon}</:item>
-        <:item title="Password">{@room.password}</:item>
-        <:item title="Theme">{@room.theme}</:item>
-        <:item title="Type">{@room.type}</:item>
-        <:item title="Max users">{@room.max_users}</:item>
-        <:item title="Game mode">{@room.game_mode}</:item>
-        <:item title="Status">{@room.status}</:item>
-      </.list>
+        <.empty_slot :for={_ <- Enum.drop(1..@room.max_users, length(@room.users))} />
+      </div>
+
+      <.control_panel
+        room={@room}
+        current_scope={@current_scope}
+        invite_link={url(~p"/rooms/#{@room}")}
+      />
     </Layouts.app>
     """
   end
@@ -70,10 +46,12 @@ defmodule PopPotatoGameWeb.RoomLive.Show do
       Lobby.subscribe_user_room(socket.assigns.current_scope, id)
     end
 
+    room = Lobby.get_room!(id)
+
     {:ok,
      socket
-     |> assign(:page_title, "Show Room")
-     |> assign(:room, Lobby.get_room!(id))}
+     |> assign(:page_title, "Lobby: #{room.theme}")
+     |> assign(room: room)}
   end
 
   @impl true

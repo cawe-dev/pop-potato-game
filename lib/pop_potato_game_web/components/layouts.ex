@@ -1,71 +1,142 @@
 defmodule PopPotatoGameWeb.Layouts do
-  @moduledoc """
-  This module holds layouts and related functionality
-  used by your application.
-  """
   use PopPotatoGameWeb, :html
 
-  # Embed all files in layouts/* within this module.
-  # The default root.html.heex file contains the HTML
-  # skeleton of your application, namely HTML headers
-  # and other static content.
   embed_templates "layouts/*"
 
-  @doc """
-  Renders your app layout.
-
-  This function is typically invoked from every template,
-  and it often contains your application menu, sidebar,
-  or similar.
-
-  ## Examples
-
-      <Layouts.app flash={@flash}>
-        <h1>Content</h1>
-      </Layouts.app>
-
-  """
   attr :flash, :map, required: true, doc: "the map of flash messages"
-
-  attr :current_scope, :map,
-    default: nil,
-    doc: "the current [scope](https://hexdocs.pm/phoenix/scopes.html)"
+  attr :current_scope, :map, default: nil, doc: "the current scope"
+  attr :page_title, :string, default: nil, doc: "the title of the current page for breadcrumbs"
 
   slot :inner_block, required: true
 
   def app(assigns) do
     ~H"""
-    <header class="navbar px-4 sm:px-6 lg:px-8">
-      <div class="flex-1">
-        <a href="/" class="flex-1 flex w-fit items-center gap-2">
-          <img src={~p"/images/logo.svg"} width="36" />
-          <span class="text-sm font-semibold">v{Application.spec(:phoenix, :vsn)}</span>
-        </a>
-      </div>
-      <div class="flex-none">
-        <ul class="flex flex-column px-1 space-x-4 items-center">
-          <li>
-            <a href="https://phoenixframework.org/" class="btn btn-ghost">Website</a>
-          </li>
-          <li>
-            <a href="https://github.com/phoenixframework/phoenix" class="btn btn-ghost">GitHub</a>
-          </li>
-          <li>
-            <.theme_toggle />
-          </li>
-          <li>
-            <a href="https://hexdocs.pm/phoenix/overview.html" class="btn btn-primary">
-              Get Started <span aria-hidden="true">&rarr;</span>
-            </a>
-          </li>
-        </ul>
-      </div>
+    <header
+      name="main-header"
+      class="navbar bg-primary border-b-brutal px-4 sm:px-8"
+    >
+      <section name="navbar-logo" class="navbar-start">
+        <.link
+          href={~p"/"}
+          class="md:text-xl font-black text-primary-content uppercase tracking-widest hover:scale-105"
+        >
+          🥔 POP POTATO
+        </.link>
+      </section>
+
+      <section name="navbar-actions" class="navbar-end flex gap-2">
+        <.theme_toggle />
+
+        <section name="desktop-menu" class="hidden md:flex items-center gap-3">
+          <%= if @current_scope do %>
+            <div class="badge text-[10px] py-3 surface-elevated-sm">
+              {@current_scope.user.nickname}
+            </div>
+
+            <.link
+              href={~p"/users/settings"}
+              class="btn btn-sm btn-square bg-info text-info-content border-brutal surface-elevated-sm hover:translate-y-px hover:shadow-none"
+              title="Settings"
+            >
+              <.icon name="hero-cog-6-tooth" class="size-5" />
+            </.link>
+
+            <.link
+              href={~p"/users/log-out"}
+              method="delete"
+              class="btn btn-sm bg-error text-error-content border-brutal surface-elevated-sm text-[10px] hover:translate-y-px hover:shadow-none"
+            >
+              Log out
+            </.link>
+          <% else %>
+            <.link
+              href={~p"/users/register"}
+              class="btn btn-sm bg-secondary text-secondary-content border-brutal surface-elevated-sm text-[10px] hover:translate-y-px hover:shadow-none"
+            >
+              Register
+            </.link>
+            <.link
+              href={~p"/users/log-in"}
+              class="btn btn-sm bg-warning text-warning-content border-brutal surface-elevated-sm text-[10px] hover:translate-y-px hover:shadow-none"
+            >
+              Log in
+            </.link>
+          <% end %>
+        </section>
+
+        <section name="mobile-menu-dropdown" class="dropdown dropdown-end md:hidden">
+          <div
+            tabindex="0"
+            role="button"
+            class="btn btn-sm btn-square border-brutal surface-elevated-sm"
+          >
+            <.icon name="hero-bars-3" class="size-5" />
+          </div>
+          <ul
+            tabindex="0"
+            class="dropdown-content menu bg-base-100 text-base-content border-brutal shadow-brutal mt-3 w-52 p-2"
+          >
+            <%= if @current_scope do %>
+              <li class="menu-title text-[8px] text-base-content opacity-70">
+                {@current_scope.user.nickname}
+              </li>
+              <li>
+                <.link href={~p"/users/settings"} class=" text-xs ">
+                  <.icon name="hero-cog-6-tooth" class="size-4" /> Settings
+                </.link>
+              </li>
+              <li>
+                <.link
+                  href={~p"/users/log-out"}
+                  method="delete"
+                  class=" text-xs text-error hover:bg-error hover:text-error-content "
+                >
+                  <.icon name="hero-arrow-right-on-rectangle" class="size-4" /> Log out
+                </.link>
+              </li>
+            <% else %>
+              <li>
+                <.link href={~p"/users/register"} class=" text-xs ">
+                  Register
+                </.link>
+              </li>
+              <li>
+                <.link href={~p"/users/log-in"} class=" text-xs ">Log in</.link>
+              </li>
+            <% end %>
+          </ul>
+        </section>
+      </section>
     </header>
 
-    <main class="px-4 py-20 sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-2xl space-y-4">
-        {render_slot(@inner_block)}
-      </div>
+    <main
+      name="main-content"
+      class="w-full max-w-7xl mx-auto pt-4 md:pt-6 px-4 sm:px-6 lg:px-8 flex flex-col gap-4"
+    >
+      <section
+        name="breadcrumbs"
+        class="breadcrumbs text-xs sm:text-sm font-bold bg-base-200 border-brutal px-4 py-2 surface-elevated-sm w-fit max-w-full overflow-hidden"
+      >
+        <ul>
+          <li>
+            <.link
+              href={~p"/"}
+              class="inline-flex gap-2 items-center hover:text-primary transition-colors"
+            >
+              <.icon name="hero-home" class="size-4" /> Home
+            </.link>
+          </li>
+          <%= if assigns[:page_title] do %>
+            <li>
+              <span class="inline-flex gap-2 items-center text-base-content/70">
+                {assigns[:page_title]}
+              </span>
+            </li>
+          <% end %>
+        </ul>
+      </section>
+
+      {render_slot(@inner_block)}
     </main>
 
     <.flash_group flash={@flash} />
@@ -74,10 +145,6 @@ defmodule PopPotatoGameWeb.Layouts do
 
   @doc """
   Shows the flash group with standard titles and content.
-
-  ## Examples
-
-      <.flash_group flash={@flash} />
   """
   attr :flash, :map, required: true, doc: "the map of flash messages"
   attr :id, :string, default: "flash-group", doc: "the optional id of flash container"
@@ -116,39 +183,30 @@ defmodule PopPotatoGameWeb.Layouts do
   end
 
   @doc """
-  Provides dark vs light theme toggle based on themes defined in app.css.
-
-  See <head> in root.html.heex which applies the theme before page load.
+  DaisyUI Swap Theme Controller.
   """
   def theme_toggle(assigns) do
     ~H"""
-    <div class="card relative flex flex-row items-center border-2 border-base-300 bg-base-300 rounded-full">
-      <div class="absolute w-1/3 h-full rounded-full border-1 border-base-200 bg-base-100 brightness-200 left-0 [[data-theme=light]_&]:left-1/3 [[data-theme=dark]_&]:left-2/3 transition-[left]" />
+    <label class="swap swap-rotate btn btn-sm btn-square bg-base-200 border-brutal  surface-elevated-sm hover:translate-y-px hover:shadow-none">
+      <input
+        type="checkbox"
+        class="theme-controller"
+        value="dark"
+        onchange="localStorage.setItem('phx:theme', this.checked ? 'dark' : 'light')"
+      />
 
-      <button
-        class="flex p-2 cursor-pointer w-1/3"
-        phx-click={JS.dispatch("phx:set-theme")}
-        data-phx-theme="system"
-      >
-        <.icon name="hero-computer-desktop-micro" class="size-4 opacity-75 hover:opacity-100" />
-      </button>
+      <.icon name="hero-sun-solid" class="swap-off size-5" />
 
-      <button
-        class="flex p-2 cursor-pointer w-1/3"
-        phx-click={JS.dispatch("phx:set-theme")}
-        data-phx-theme="light"
-      >
-        <.icon name="hero-sun-micro" class="size-4 opacity-75 hover:opacity-100" />
-      </button>
+      <.icon name="hero-moon-solid" class="swap-on size-5" />
+    </label>
 
-      <button
-        class="flex p-2 cursor-pointer w-1/3"
-        phx-click={JS.dispatch("phx:set-theme")}
-        data-phx-theme="dark"
-      >
-        <.icon name="hero-moon-micro" class="size-4 opacity-75 hover:opacity-100" />
-      </button>
-    </div>
+    <script>
+      window.addEventListener("DOMContentLoaded", () => {
+        const theme = localStorage.getItem("phx:theme");
+        const toggle = document.querySelector(".theme-controller");
+        if(theme === "dark" && toggle) toggle.checked = true;
+      });
+    </script>
     """
   end
 end

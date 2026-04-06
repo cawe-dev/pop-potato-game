@@ -7,7 +7,7 @@ defmodule PopPotatoGameWeb.RoomLive.Form do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} current_scope={@current_scope}>
+    <Layouts.app flash={@flash} current_scope={@current_scope} page_title={@page_title}>
       <.header>
         {@page_title}
         <:subtitle>Use this form to manage room records in your database.</:subtitle>
@@ -88,9 +88,7 @@ defmodule PopPotatoGameWeb.RoomLive.Form do
         {:noreply,
          socket
          |> put_flash(:info, "Room created successfully")
-         |> push_navigate(
-           to: ~p"/rooms/#{room.id}"
-         )}
+         |> push_navigate(to: ~p"/rooms/#{room.id}")}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, form: to_form(changeset))}
