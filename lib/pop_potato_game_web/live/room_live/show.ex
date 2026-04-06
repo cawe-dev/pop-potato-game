@@ -177,10 +177,15 @@ defmodule PopPotatoGameWeb.RoomLive.Show do
            String.to_integer(target_user_id)
          ) do
       {:ok, _room_user} ->
+        kicked_user =
+          Enum.find(socket.assigns.room.users, fn user ->
+            user.id == String.to_integer(target_user_id)
+          end)
+
         {:noreply,
          socket
          |> assign(:room, Lobby.get_room!(socket.assigns.room.id))
-         |> put_flash(:info, "#{target_user_id} is kicked")}
+         |> put_flash(:info, "#{kicked_user.nickname} was kicked")}
 
       {:error, :user_not_found} ->
         {:noreply,
