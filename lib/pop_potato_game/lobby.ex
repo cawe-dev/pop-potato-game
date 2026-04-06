@@ -119,16 +119,34 @@ defmodule PopPotatoGame.Lobby do
     * {:deleted, %Room{}}
 
   """
-  def subscribe_rooms(%Scope{} = scope) do
-    key = scope.user.id
-
-    Phoenix.PubSub.subscribe(PopPotatoGame.PubSub, "user:#{key}:rooms")
+  def subscribe_rooms() do
+    Phoenix.PubSub.subscribe(PopPotatoGame.PubSub, "lobby:rooms")
   end
 
-  defp broadcast_room(%Scope{} = scope, message) do
-    key = scope.user.id
+  def subscribe_room(room_id) do
+    Phoenix.PubSub.subscribe(PopPotatoGame.PubSub, "lobby:room:#{room_id}")
+  end
 
-    Phoenix.PubSub.broadcast(PopPotatoGame.PubSub, "user:#{key}:rooms", message)
+  def subscribe_user_room(%Scope{} = scope, room_id) do
+    user_id = scope.user.id
+
+    Phoenix.PubSub.subscribe(PopPotatoGame.PubSub, "lobby:user:#{user_id}:room:#{room_id}")
+  end
+
+  defp broadcast_rooms(message) do
+    Phoenix.PubSub.broadcast(PopPotatoGame.PubSub, "lobby:rooms", message)
+  end
+
+  defp broadcast_room({_event, %Room{} = room} = message) do
+    Phoenix.PubSub.broadcast(PopPotatoGame.PubSub, "lobby:room:#{room.id}", message)
+  end
+
+  defp broadcast_user_room(%Scope{} = _scope, {_event, %RoomUser{} = room_user} = message) do
+    Phoenix.PubSub.broadcast(
+      PopPotatoGame.PubSub,
+      "lobby:user:#{room_user.user_id}:room:#{room_user.room_id}",
+      message
+    )
   end
 
   @doc """
@@ -168,7 +186,7 @@ defmodule PopPotatoGame.Lobby do
     |> Repo.transact()
     |> case do
       {:ok, result} ->
-        broadcast_room(scope, {:created, result.room})
+        broadcast_rooms({:created, result.room})
         {:ok, result.room}
 
       {:error, step, reason, _changes} ->
@@ -198,7 +216,8 @@ defmodule PopPotatoGame.Lobby do
              room
              |> Room.changeset(attrs)
              |> Repo.update() do
-        broadcast_room(scope, {:updated, room})
+        broadcast_rooms({:updated, room})
+        broadcast_room({:updated, room})
         {:ok, room}
       end
     end
@@ -217,12 +236,14 @@ defmodule PopPotatoGame.Lobby do
 
   """
   def delete_room(%Scope{} = scope, %Room{} = room) do
-    true = room.user_id == scope.user.id
-
-    with {:ok, room = %Room{}} <-
-           Repo.delete(room) do
-      broadcast_room(scope, {:deleted, room})
-      {:ok, room}
+    if room.user_id == scope.user.id do
+      with {:ok, room = %Room{}} <-
+             Repo.delete(room) do
+        broadcast_rooms({:deleted, room})
+        {:ok, room}
+      end
+    else
+      {:error, :unathorized}
     end
   end
 
@@ -246,20 +267,30 @@ defmodule PopPotatoGame.Lobby do
   end
 
   def join_room(%Scope{} = scope, %Room{} = room, provided_password \\ nil) do
-    if room.type == :private && room.password != provided_password do
-      {:error, :invalid_password}
+    if room.user_id == scope.user.id do
+      broadcast_room({:join, room})
     else
-      users_count = Repo.aggregate(from(ru in RoomUser, where: ru.room_id == ^room.id), :count)
-
-      if users_count >= room.max_users do
-        {:error, :room_full}
+      if room.type == :private && room.password != provided_password do
+        {:error, :invalid_password}
       else
-        attrs = %{
-          room_id: room.id,
-          user_id: scope.user.id
-        }
+        users_count = Repo.aggregate(from(ru in RoomUser, where: ru.room_id == ^room.id), :count)
 
-        Repo.insert(RoomUser.changeset(%RoomUser{}, attrs))
+        if users_count >= room.max_users do
+          {:error, :room_full}
+        else
+          attrs = %{
+            room_id: room.id,
+            user_id: scope.user.id
+          }
+
+          case Repo.insert(RoomUser.changeset(%RoomUser{}, attrs)) do
+            {:ok, _room_user} ->
+              broadcast_room({:join, room})
+
+            {:error, %Ecto.Changeset{} = _changeset} ->
+              {:error, :error_on_join}
+          end
+        end
       end
     end
   end
@@ -289,15 +320,21 @@ defmodule PopPotatoGame.Lobby do
   def kick_user(%Scope{} = scope, %Room{} = room, target_user_id) do
     true = room.user_id == scope.user.id
 
-    attrs = %{room_id: room.id, user_id: target_user_id}
+    if target_user_id == scope.user.id do
+      {:error, :owner_cannot_kicked}
+    else
+      attrs = %{room_id: room.id, user_id: target_user_id}
 
-    case Repo.get_by(RoomUser, attrs) do
-      %RoomUser{} = room_user ->
-        room_user
-        |> Repo.delete()
+      case Repo.get_by(RoomUser, attrs) do
+        %RoomUser{} = room_user ->
+          with {:ok, deleted_room_user} <- Repo.delete(room_user) do
+            broadcast_user_room(scope, {:kicked, deleted_room_user})
+            {:ok, deleted_room_user}
+          end
 
-      nil ->
-        {:error, :user_not_found}
+        nil ->
+          {:error, :user_not_found}
+      end
     end
   end
 

@@ -89,7 +89,7 @@ defmodule PopPotatoGameWeb.RoomLive.Form do
          socket
          |> put_flash(:info, "Room created successfully")
          |> push_navigate(
-           to: return_path(socket.assigns.current_scope, socket.assigns.return_to, room)
+           to: ~p"/rooms/#{room.id}"
          )}
 
       {:error, %Ecto.Changeset{} = changeset} ->

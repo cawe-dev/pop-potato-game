@@ -66,7 +66,8 @@ defmodule PopPotatoGameWeb.RoomLive.Show do
   @impl true
   def mount(%{"id" => id}, _session, socket) do
     if connected?(socket) do
-      Lobby.subscribe_rooms(socket.assigns.current_scope)
+      Lobby.subscribe_room(id)
+      Lobby.subscribe_user_room(socket.assigns.current_scope, id)
     end
 
     {:ok,
@@ -89,25 +90,43 @@ defmodule PopPotatoGameWeb.RoomLive.Show do
       ) do
     {:noreply,
      socket
-     |> put_flash(:error, "The current room was deleted.")
+     |> put_flash(:error, "The current room was deleted")
      |> push_navigate(to: ~p"/rooms")}
   end
 
+  @impl true
+  def handle_info(
+        {:join, %PopPotatoGame.Lobby.Room{id: id} = _room},
+        %{assigns: %{room: %{id: id}}} = socket
+      ) do
+    {:noreply,
+     socket
+     |> assign(:room, Lobby.get_room!(socket.assigns.room.id))}
+  end
+
   def handle_info({type, %PopPotatoGame.Lobby.Room{}}, socket)
-      when type in [:created, :updated, :deleted] do
+      when type in [:created, :updated, :deleted, :join] do
     {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info(
+        {:kicked, %PopPotatoGame.Lobby.RoomUser{room_id: id} = _room_user},
+        %{assigns: %{room: %{id: id}}} = socket
+      ) do
+    {:noreply,
+     socket
+     |> put_flash(:info, "You were kicked out")
+     |> push_navigate(to: ~p"/rooms")}
   end
 
   @impl true
   def handle_event("start_match", _params, socket) do
     case Lobby.start_match(socket.assigns.current_scope, socket.assigns.room) do
       {:ok, _room} ->
-        socket =
-          socket
-          |> assign(:room, Lobby.get_room!(socket.assigns.room.id))
-
         {:noreply,
          socket
+         |> assign(:room, Lobby.get_room!(socket.assigns.room.id))
          |> put_flash(:info, "Starting match")}
 
       {:error, :only_owner_present} ->
