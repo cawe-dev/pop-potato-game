@@ -104,6 +104,20 @@ defmodule PopPotatoGameWeb.RoomLive.Show do
      |> assign(:room, Lobby.get_room!(socket.assigns.room.id))}
   end
 
+  @impl true
+  def handle_info(
+        {:new_owner, %PopPotatoGame.Lobby.Room{id: id} = room},
+        %{assigns: %{room: %{id: id}}} = socket
+      ) do
+    new_owner =
+      Enum.find(room.users, fn user -> user.id == room.user_id end)
+
+    {:noreply,
+     socket
+     |> assign(room: room)
+     |> put_flash(:info, "#{new_owner.nickname} is new owner")}
+  end
+
   def handle_info({type, %PopPotatoGame.Lobby.Room{}}, socket)
       when type in [:created, :updated, :deleted, :join] do
     {:noreply, socket}
@@ -145,10 +159,7 @@ defmodule PopPotatoGameWeb.RoomLive.Show do
            String.to_integer(new_owner_id)
          ) do
       {:ok, _room} ->
-        {:noreply,
-         socket
-         |> assign(:room, Lobby.get_room!(socket.assigns.room.id))
-         |> put_flash(:info, "#{new_owner_id} is new owner")}
+        {:noreply, socket}
 
       {:error, :user_not_found} ->
         {:noreply,

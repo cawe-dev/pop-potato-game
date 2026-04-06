@@ -345,9 +345,13 @@ defmodule PopPotatoGame.Lobby do
 
     case Repo.get_by(RoomUser, attrs) do
       %RoomUser{} = _room_user ->
-        room
-        |> Ecto.Changeset.change(user_id: new_owner_id)
-        |> Repo.update()
+        with %Ecto.Changeset{} = changeset <- Ecto.Changeset.change(room, user_id: new_owner_id),
+             {:ok, updated_room} <- Repo.update(changeset) do
+          broadcast_room({:new_owner, updated_room})
+          {:ok, updated_room}
+        else
+          {:error, changeset} -> {:error, changeset}
+        end
 
       nil ->
         {:error, :user_not_found}
