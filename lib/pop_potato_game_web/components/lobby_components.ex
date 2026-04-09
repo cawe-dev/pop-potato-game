@@ -5,6 +5,57 @@ defmodule PopPotatoGameWeb.LobbyComponents do
   alias PopPotatoGameWeb.CoreComponents
   alias Phoenix.LiveView.JS
 
+  attr :navigate, :string, required: true
+
+  def create_room_ticket(assigns) do
+    ~H"""
+    <div class="ticket-wrapper min-w-xs">
+      <.link
+        navigate={@navigate}
+        class="ticket-shape bg-primary text-card-foreground p-3 flex items-center"
+      >
+        <div class="flex items-center gap-4 pl-4 sm:pl-6">
+          <CoreComponents.icon name="hero-plus" class="w-10 h-10 text-accent-foreground" />
+          <span class="text-white font-bold uppercase text-lg leading-tight">New Room</span>
+        </div>
+      </.link>
+    </div>
+    """
+  end
+
+  attr :id, :string, required: true
+  attr :room_id, :any, required: true
+  attr :icon, :string, required: true
+  attr :theme, :string, required: true
+  attr :users, :integer, required: true
+  attr :max_users, :integer, required: true
+  attr :type, :string, required: true
+
+  def ticket_room(assigns) do
+    ~H"""
+    <div id={@id} class="ticket-wrapper cursor-pointer min-w-xs">
+      <.link
+        phx-click={JS.push("join_room", value: %{room_id: @room_id})}
+        class="ticket-shape bg-base-100 text-base-content p-3 flex items-center justify-between"
+      >
+        <div class="flex items-center gap-4 pl-4 sm:pl-6">
+          <CoreComponents.icon name={@icon} class="w-10 h-10 text-primary" />
+          <span class="font-black uppercase text-lg leading-tight">{@theme}</span>
+        </div>
+        <div class="flex flex-col items-end pr-4 sm:pr-6">
+          <span class="font-bold text-xl">{@users}/{@max_users}</span>
+          <span
+            :if={@type}
+            class="font-bold text-xs uppercase text-neutral tracking-widest mt-1"
+          >
+            {@type}
+          </span>
+        </div>
+      </.link>
+    </div>
+    """
+  end
+
   attr :room, :map, required: true
   attr :back_path, :string, required: true
   attr :edit_path, :string, default: nil

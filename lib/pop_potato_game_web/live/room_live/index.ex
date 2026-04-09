@@ -1,5 +1,6 @@
 defmodule PopPotatoGameWeb.RoomLive.Index do
   use PopPotatoGameWeb, :live_view
+  import PopPotatoGameWeb.LobbyComponents
 
   alias PopPotatoGame.Lobby
 
@@ -8,42 +9,28 @@ defmodule PopPotatoGameWeb.RoomLive.Index do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope} page_title={@page_title}>
       <.header>
-        Listing Rooms
+        <p>Listing Rooms</p>
         <:actions>
-          <.button variant="primary" navigate={~p"/rooms/new"}>
-            <.icon name="hero-plus" /> New Room
-          </.button>
+          <.create_room_ticket navigate={~p"/rooms/new"} />
         </:actions>
       </.header>
 
-      <.table
-        id="rooms"
-        rows={@streams.rooms}
-        row_click={fn {_id, room} -> JS.push("join_room", value: %{room_id: room.id}) end}
+      <div
+        id="rooms-stream-container"
+        phx-update="stream"
+        class="flex flex-col sm:flex-row justify-center sm:justify-start gap-4 mt-6"
       >
-        <:col :let={{_id, room}} label="Code">{room.code}</:col>
-        <:col :let={{_id, room}} label="Icon">{room.icon}</:col>
-        <:col :let={{_id, room}} label="Password">{room.password}</:col>
-        <:col :let={{_id, room}} label="Theme">{room.theme}</:col>
-        <:col :let={{_id, room}} label="Type">{room.type}</:col>
-        <:col :let={{_id, room}} label="Max users">{room.max_users}</:col>
-        <:col :let={{_id, room}} label="Game mode">{room.game_mode}</:col>
-        <:col :let={{_id, room}} label="Status">{room.status}</:col>
-        <:action :let={{_id, room}}>
-          <div class="sr-only">
-            <.link navigate={~p"/rooms/#{room}"}>Show</.link>
-          </div>
-          <.link navigate={~p"/rooms/#{room}/edit"}>Edit</.link>
-        </:action>
-        <:action :let={{id, room}}>
-          <.link
-            phx-click={JS.push("delete", value: %{id: room.id})}
-            data-confirm="Are you sure?"
-          >
-            Delete
-          </.link>
-        </:action>
-      </.table>
+        <.ticket_room
+          :for={{dom_id, room} <- @streams.rooms}
+          id={dom_id}
+          room_id={room.id}
+          icon={"hero-#{room.icon}"}
+          theme={room.theme}
+          users={length(room.users)}
+          max_users={room.max_users}
+          type={room.type}
+        />
+      </div>
     </Layouts.app>
     """
   end
@@ -57,7 +44,7 @@ defmodule PopPotatoGameWeb.RoomLive.Index do
     {:ok,
      socket
      |> assign(:page_title, "Listing Rooms")
-     |> stream(:rooms, list_rooms())}
+     |> stream(:rooms, list_rooms_with_index())}
   end
 
   @impl true
@@ -111,10 +98,18 @@ defmodule PopPotatoGameWeb.RoomLive.Index do
   @impl true
   def handle_info({type, %PopPotatoGame.Lobby.Room{}}, socket)
       when type in [:created, :updated, :deleted] do
-    {:noreply, stream(socket, :rooms, list_rooms(), reset: true)}
+    {:noreply, stream(socket, :rooms, list_rooms_with_index(), reset: true)}
   end
 
   defp list_rooms() do
     Lobby.list_rooms()
+  end
+
+  defp list_rooms_with_index() do
+    list_rooms()
+    |> Enum.with_index()
+    |> Enum.map(fn {room, index} ->
+      Map.put(room, :index, index + 1)
+    end)
   end
 end

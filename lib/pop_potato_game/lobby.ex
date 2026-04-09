@@ -39,6 +39,7 @@ defmodule PopPotatoGame.Lobby do
     |> base_rooms_query()
     |> apply_room_filters(filters)
     |> Repo.all()
+    |> Repo.preload([:user, :users])
   end
 
   defp base_rooms_query(query) do

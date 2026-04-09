@@ -196,6 +196,36 @@
   filter: drop-shadow(2px 2px 0px color-mix(in srgb, var(--brutal-edge) 50%, transparent));
 }
 
+.ticket-wrapper {
+  filter:
+    drop-shadow(3px 0px 0px var(--brutal-edge)) drop-shadow(-3px 0px 0px var(--brutal-edge)) drop-shadow(0px 3px 0px var(--brutal-edge)) drop-shadow(0px -3px 0px var(--brutal-edge)) drop-shadow(4px 4px 0px var(--brutal-edge));
+  transition: filter 0.15s ease, transform 0.15s ease;
+}
+
+.ticket-shape {
+  border-radius: var(--radius-lg, 0.75rem);
+
+  mask-image:
+    radial-gradient(circle 14px at 0% 50%, transparent 14px, black 14.5px),
+    radial-gradient(circle 14px at 100% 50%, transparent 14px, black 14.5px);
+
+  mask-size: 51% 100%;
+  mask-position: left, right;
+  mask-repeat: no-repeat;
+}
+
+.ticket-wrapper:hover {
+  filter:
+    drop-shadow(3px 0px 0px var(--brutal-edge)) drop-shadow(-3px 0px 0px var(--brutal-edge)) drop-shadow(0px 3px 0px var(--brutal-edge)) drop-shadow(0px -3px 0px var(--brutal-edge)) drop-shadow(6px 6px 0px var(--brutal-edge));
+  transform: translate(-2px, -2px);
+}
+
+.ticket-wrapper:active {
+  filter:
+    drop-shadow(3px 0px 0px var(--brutal-edge)) drop-shadow(-3px 0px 0px var(--brutal-edge)) drop-shadow(0px 3px 0px var(--brutal-edge)) drop-shadow(0px -3px 0px var(--brutal-edge)) drop-shadow(1px 1px 0px var(--brutal-edge));
+  transform: translate(2px, 2px);
+}
+
 @layer base {
   body {
     background-color: var(--color-base-100);
