@@ -10,6 +10,7 @@ defmodule PopPotatoGame.Repo.Migrations.CreateUsersAuthTables do
       add :confirmed_at, :utc_datetime
       add :nickname, :string
       add :is_guest, :boolean, default: false, null: false
+      add :is_admin, :boolean, default: false, null: false
 
       timestamps(type: :utc_datetime)
     end
