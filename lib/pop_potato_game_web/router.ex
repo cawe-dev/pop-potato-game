@@ -38,6 +38,21 @@ defmodule PopPotatoGameWeb.Router do
     end
   end
 
+  scope "/", PopPotatoGameWeb do
+    pipe_through [:browser, :require_authenticated_user]
+
+    live_session :admin_session,
+      on_mount: [
+        {PopPotatoGameWeb.UserAuth, :require_authenticated},
+        {PopPotatoGameWeb.UserAuth, :mount_current_scope}
+      ] do
+      live "/themes", ThemeLive.Index, :index
+      live "/themes/new", ThemeLive.Form, :new
+      live "/themes/:id", ThemeLive.Show, :show
+      live "/themes/:id/edit", ThemeLive.Form, :edit
+    end
+  end
+
   # Other scopes may use custom stacks.
   # scope "/api", PopPotatoGameWeb do
   #   pipe_through :api
