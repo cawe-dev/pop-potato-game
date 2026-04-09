@@ -74,18 +74,18 @@ defmodule PopPotatoGameWeb.LobbyComponents do
           <CoreComponents.icon name="hero-arrow-left" class="size-6" />
         </CoreComponents.button>
 
-        <h1 class="text-xl sm:text-2xl font-black pixel-text text-base-content uppercase truncate">
+        <h1 class="text-xl sm:text-2xl font-black text-base-content uppercase truncate">
           {@room.theme}
         </h1>
       </section>
 
       <section name="navbar-end" class="navbar-end w-full md:w-auto gap-2">
-        <div class="badge badge-lg h-10 rounded-none bg-base-100 surface-elevated-sm font-bold pixel-text text-xs sm:text-sm border-none">
+        <div class="badge badge-lg h-10 rounded-none bg-base-100 surface-elevated-sm font-bold text-xs sm:text-sm border-none">
           CODE: {@room.code}
           <CoreComponents.icon :if={@room.password} name="hero-lock-closed" class="size-4 ml-1" />
         </div>
 
-        <div class="badge badge-lg h-10 rounded-none bg-base-content text-base-100 surface-elevated-sm font-bold pixel-text text-xs sm:text-sm border-none">
+        <div class="badge badge-lg h-10 rounded-none bg-base-content text-base-100 surface-elevated-sm font-bold text-xs sm:text-sm border-none">
           {length(@room.users)}/{@room.max_users}
         </div>
 
@@ -157,7 +157,7 @@ defmodule PopPotatoGameWeb.LobbyComponents do
                   type="button"
                   phx-click="transfer_owner"
                   phx-value-new_owner_id={@user.id}
-                  class="rounded-none border-b-brutal hover:bg-warning hover:text-warning-content pixel-text text-xs p-3"
+                  class="rounded-none border-b-brutal hover:bg-warning hover:text-warning-content text-xs p-3"
                 >
                   <CoreComponents.icon name="hero-arrows-right-left" class="size-4" /> Transfer
                 </button>
@@ -167,7 +167,7 @@ defmodule PopPotatoGameWeb.LobbyComponents do
                   type="button"
                   phx-click="kick_user"
                   phx-value-target_user_id={@user.id}
-                  class="rounded-none hover:bg-error hover:text-error-content pixel-text text-xs p-3"
+                  class="rounded-none hover:bg-error hover:text-error-content text-xs p-3"
                 >
                   <CoreComponents.icon name="hero-x-mark" class="size-4" /> Kick
                 </button>
@@ -186,7 +186,7 @@ defmodule PopPotatoGameWeb.LobbyComponents do
 
           <section
             name="user-nickname"
-            class="badge badge-lg w-full bg-black text-white text-xs pixel-text border-brutal rounded-none truncate z-10 py-3"
+            class="badge badge-lg w-full bg-black text-white text-xs border-brutal rounded-none truncate z-10 py-3"
           >
             {@user.nickname}
           </section>
@@ -221,10 +221,10 @@ defmodule PopPotatoGameWeb.LobbyComponents do
     ~H"""
     <section
       name="empty-slot"
-      class="card w-full aspect-square bg-base-300 rounded-none border-4 border-dashed border-base-content opacity-50"
+      class="card w-full aspect-square bg-base-300 border-4 border-dashed opacity-50"
     >
-      <div class="card-body items-center justify-center p-0">
-        <CoreComponents.icon name="hero-plus" class="size-10 text-base-content" />
+      <div class="card-body items-center justify-center">
+        <CoreComponents.icon name="hero-plus" class="size-10" />
       </div>
     </section>
     """
@@ -237,27 +237,25 @@ defmodule PopPotatoGameWeb.LobbyComponents do
   def control_panel(assigns) do
     ~H"""
     <section
+      :if={@current_scope.user.id == @room.user_id}
       name="control-panel"
-      class="fixed bottom-0 left-0 w-full bg-base-200 p-4 z-50 border-t-brutal shadow-brutal-top"
+      class="fixed bottom-0 left-0 w-full bg-base-200 p-4"
     >
       <div class="max-w-7xl mx-auto flex gap-4">
         <CoreComponents.button
-          :if={@current_scope.user.id == @room.user_id}
-          phx-click={JS.dispatch("phx:copy", to: "#invite-link")}
-          id="invite-link"
+          phx-click={JS.dispatch("phx:copy", to: "#invite-link-room")}
+          id="invite-link-room"
           data-clipboard-text={@invite_link}
-          class="w-1/3 md:w-auto btn-primary surface-elevated surface-elevated-interactive pixel-text text-xs md:text-sm h-14"
+          class="w-1/3 btn-primary surface-elevated surface-elevated-interactive text-xs"
         >
           <CoreComponents.icon name="hero-link" class="size-5 md:mr-2" />
-          <span class="hidden md:inline">Copy Link</span>
         </CoreComponents.button>
 
         <CoreComponents.button
-          :if={@current_scope.user.id == @room.user_id}
           phx-click="start_match"
           disabled={length(@room.users) < 2}
           class={[
-            "flex-1 md:w-auto text-lg md:text-xl h-14 pixel-text surface-elevated",
+            "flex-1 md:w-auto text-lg md:text-xl h-14 surface-elevated",
             length(@room.users) < 2 && "bg-neutral text-neutral-content opacity-50 cursor-not-allowed",
             length(@room.users) >= 2 && "bg-accent text-accent-content surface-elevated-interactive"
           ]}
