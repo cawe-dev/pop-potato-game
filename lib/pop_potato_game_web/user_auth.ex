@@ -279,6 +279,17 @@ defmodule PopPotatoGameWeb.UserAuth do
     end
   end
 
+  def require_admin_user(conn, _opts) do
+    if conn.assigns.current_scope.user.is_admin do
+      conn
+    else
+      conn
+      |> put_flash(:error, "You must a admin to access this page.")
+      |> redirect(to: ~p"/")
+      |> halt()
+    end
+  end
+
   defp maybe_store_return_to(%{method: "GET"} = conn) do
     put_session(conn, :user_return_to, current_path(conn))
   end

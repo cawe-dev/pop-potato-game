@@ -39,7 +39,7 @@ defmodule PopPotatoGameWeb.Router do
   end
 
   scope "/", PopPotatoGameWeb do
-    pipe_through [:browser, :require_authenticated_user]
+    pipe_through [:browser, :require_authenticated_user, :require_admin_user]
 
     live_session :admin_session,
       on_mount: [
